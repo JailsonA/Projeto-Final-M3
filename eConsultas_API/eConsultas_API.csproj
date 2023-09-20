@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\img\Upload\" />
+    <Folder Include="wwwroot\pdf\upload\" />
   </ItemGroup>
 
 </Project>

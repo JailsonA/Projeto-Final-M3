@@ -34,7 +34,7 @@ namespace DataAccessLayer.Filters
                 }
 
                 // Agora, você pode adicionar o registro ao banco de dados usando o EF Core e o dbContext fornecido
-                var imageUser = new ImageUser
+                var imageUser = new FileUser
                 {
                     ImageUrl = Path.Combine(uploadDirectory, fileName),
                     UserId = userId

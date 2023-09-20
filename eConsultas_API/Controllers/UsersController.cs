@@ -205,7 +205,7 @@ namespace eConsultas_API.Controllers
 
         [HttpPut]
         [UserAcess]
-        public IActionResult addImage(ImageUser image, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        public IActionResult addImage(FileUser image, [FromHeader(Name = "Authorization")] string authorizationHeader)
         {
             string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
@@ -263,7 +263,7 @@ namespace eConsultas_API.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
-            ImageUser image = new ImageUser();
+            FileUser image = new FileUser();
             image.imageFile = file;
             int userId = 1;
             bool isSend = _userRepository.IsFileCopy(image, userId);

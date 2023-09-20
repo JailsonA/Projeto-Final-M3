@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DataAccessLayer.Model
 {
-    public class ImageUser
+    public class FileUser
     {
         [Key]
         public int ImgId { get; set; }

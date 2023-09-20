@@ -48,10 +48,11 @@ namespace DataAccessLayer.Migrations
                     PatientUserId = table.Column<int>(type: "int", nullable: false),
                     PDFFile = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PatientMsg = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DoctorMsg = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DoctorMsg = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Price = table.Column<float>(type: "real", nullable: true),
                     UpdateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AppointmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    info = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    info = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsCompleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -62,13 +63,13 @@ namespace DataAccessLayer.Migrations
                         column: x => x.DoctorUserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Appointments_Users_PatientUserId",
                         column: x => x.PatientUserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -98,18 +99,13 @@ namespace DataAccessLayer.Migrations
                     MessageId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AppointId = table.Column<int>(type: "int", nullable: true),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AppointId = table.Column<int>(type: "int", nullable: false),
                     TimeSend = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Message", x => x.MessageId);
-                    table.ForeignKey(
-                        name: "FK_Message_Appointments_AppointId",
-                        column: x => x.AppointId,
-                        principalTable: "Appointments",
-                        principalColumn: "AppointId");
                     table.ForeignKey(
                         name: "FK_Message_Users_UserId",
                         column: x => x.UserId,
@@ -134,11 +130,6 @@ namespace DataAccessLayer.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Message_AppointId",
-                table: "Message",
-                column: "AppointId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Message_UserId",
                 table: "Message",
                 column: "UserId");
@@ -148,13 +139,13 @@ namespace DataAccessLayer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Appointments");
+
+            migrationBuilder.DropTable(
                 name: "ImgUser");
 
             migrationBuilder.DropTable(
                 name: "Message");
-
-            migrationBuilder.DropTable(
-                name: "Appointments");
 
             migrationBuilder.DropTable(
                 name: "Users");

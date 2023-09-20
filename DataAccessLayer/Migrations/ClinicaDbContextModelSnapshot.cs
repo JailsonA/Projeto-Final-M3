@@ -34,7 +34,6 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DoctorMsg")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DoctorUserId")
@@ -53,11 +52,13 @@ namespace DataAccessLayer.Migrations
                     b.Property<int>("PatientUserId")
                         .HasColumnType("int");
 
+                    b.Property<float?>("Price")
+                        .HasColumnType("real");
+
                     b.Property<DateTime>("UpdateTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("info")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AppointId");
@@ -90,7 +91,7 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("ImgUser");
                 });
 
-            modelBuilder.Entity("DataAccessLayer.Model.Message", b =>
+            modelBuilder.Entity("DataAccessLayer.Model.MessageModel", b =>
                 {
                     b.Property<int>("MessageId")
                         .ValueGeneratedOnAdd()
@@ -98,7 +99,7 @@ namespace DataAccessLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
 
-                    b.Property<int?>("AppointId")
+                    b.Property<int>("AppointId")
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
@@ -112,8 +113,6 @@ namespace DataAccessLayer.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("MessageId");
-
-                    b.HasIndex("AppointId");
 
                     b.HasIndex("UserId");
 
@@ -230,26 +229,15 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DataAccessLayer.Model.Message", b =>
+            modelBuilder.Entity("DataAccessLayer.Model.MessageModel", b =>
                 {
-                    b.HasOne("DataAccessLayer.Model.AppointmentModel", "AppointID")
-                        .WithMany("Messages")
-                        .HasForeignKey("AppointId");
-
                     b.HasOne("DataAccessLayer.Model.UserModel", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AppointID");
-
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DataAccessLayer.Model.AppointmentModel", b =>
-                {
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

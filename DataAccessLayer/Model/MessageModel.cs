@@ -12,15 +12,14 @@ namespace DataAccessLayer.Model
 {
 
 
-    public class Message
+    public class MessageModel
     {
         [Key]
         public int MessageId { get; set; }
         public int UserId { get; set; }
         public UserModel User { get; set; }
-        public string Content { get; set; } // This is the foreign key for the relationship       
-        [JsonIgnore]
-        public AppointmentModel? AppointID { get; set; }
+        public string Message { get; set; }
+        public int AppointId { get; set; }
         public DateTime TimeSend { get; set; }
     }
 

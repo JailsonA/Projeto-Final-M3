@@ -19,9 +19,6 @@ namespace DataAccessLayer.Data
         {
         }
 
-
-
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -36,10 +33,10 @@ namespace DataAccessLayer.Data
 
         // Meus dbSets
         public DbSet<UserModel> Users { get; set; }
-        public DbSet<ImageUser> ImgUser { get; set; }
+        public DbSet<FileUser> ImgUser { get; set; }
         public DbSet<AppointmentModel> Appointments { get; set; }
         public DbSet<PatientModel> Patients { get; set; }
         public DbSet<DoctorModel> Doctors { get; set; }
-        public DbSet<Message> Message { get; set; }
+        public DbSet<MessageModel> Message { get; set; }
     }
 }

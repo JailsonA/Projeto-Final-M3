@@ -59,7 +59,7 @@ namespace DataAccessLayer.Repository
             return doctors;
         }
 
-        public bool IsFileCopy(ImageUser image, int userId)
+        public bool IsFileCopy(FileUser image, int userId)
         {
             List<string> permExtensions = new List<string> { ".jpeg", ".png", ".jpg" };
             string uploadDirectory = "img/Upload";
