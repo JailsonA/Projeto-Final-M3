@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=LAPTOP-D8T7SBRN;Initial Catalog=DB_eClinica;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}
