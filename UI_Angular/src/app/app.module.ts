@@ -1,18 +1,22 @@
+// app.module.ts
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { DataDisplayComponent } from './data-display/data-display.component';
+import { LandPageComponent } from './land-page/land-page.component';
+import { DashLandComponent } from './dash-land/dash-land.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DataDisplayComponent
+    LandPageComponent,
+    DashLandComponent,
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    AppRoutingModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

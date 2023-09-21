@@ -21,5 +21,5 @@ export class ApiService {
           observer.error(error);
         });
     });
-  }
+  } 
 }
