@@ -1,0 +1,132 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = Layout = "_AdminLayout";
+}
+
+<div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active">Create</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<div class="row">
+    <div class="col-lg-12">
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Choose your Appointment</h5>
+                <!-- Floating Labels Form -->
+                <form class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="floatingSelect" aria-label="Region">
+                                <option selected>New York</option>
+                                <option value="1">Oregon</option>
+                                <option value="2">DC</option>
+                            </select>
+                            <label for="Region">Region</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="floatingSelect" aria-label="City">
+                                <option selected>Select City</option>
+                                <option value="1">Oregon</option>
+                                <option value="2">DC</option>
+                            </select>
+                            <label for="City">City</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="floatingSelect" aria-label="Especialization">
+                                <option selected>Select Especialization</option>
+                                <option value="1">Oregon</option>
+                                <option value="2">DC</option>
+                            </select>
+                            <label for="Especialization">Especialization</label>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                    </div>
+                </form><!-- End floating Labels Form -->
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-lg-12">
+        <!-- Recent Sales -->
+        <div class="col-12">
+            <div class="card recent-sales overflow-auto">
+
+                <div class="card-body">
+                    <h5 class="card-title">Doctor to appointement <span>| Available</span></h5>
+
+                    <table class="table table-borderless datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Customer</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row"><a href="#">#2457</a></th>
+                                <td>Brandon Jacob</td>
+                                <td><a href="#" class="text-primary">At praesentium minu</a></td>
+                                <td>$64</td>
+                                <td><span class="badge bg-success">Approved</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><a href="#">#2147</a></th>
+                                <td>Bridie Kessler</td>
+                                <td><a href="#" class="text-primary">Blanditiis dolor omnis similique</a></td>
+                                <td>$47</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><a href="#">#2049</a></th>
+                                <td>Ashleigh Langosh</td>
+                                <td><a href="#" class="text-primary">At recusandae consectetur</a></td>
+                                <td>$147</td>
+                                <td><span class="badge bg-success">Approved</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><a href="#">#2644</a></th>
+                                <td>Angus Grady</td>
+                                <td><a href="#" class="text-primar">Ut voluptatem id earum et</a></td>
+                                <td>$67</td>
+                                <td><span class="badge bg-danger">Rejected</span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><a href="#">#2644</a></th>
+                                <td>Raheem Lehner</td>
+                                <td><a href="#" class="text-primary">Sunt similique distinctio</a></td>
+                                <td>$165</td>
+                                <td><span class="badge bg-success">Approved</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </div>
+        </div><!-- End Recent Sales -->
+
+    </div>
+</div><!-- End Left side columns -->
+    </div>
+</div>
+

@@ -1,0 +1,23 @@
+<table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Doctor Name</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let appointment of appointments">
+        <td>{{appointment.appointId}}</td>
+        <td>{{appointment.patientMsg  }}</td>
+        <td>{{appointment.appointmentDate | date}}</td>
+        <td>
+          <!-- Aqui você pode adicionar botões para edição e deleção -->
+          <button>Edit</button>
+          <button>Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  

@@ -19,6 +19,6 @@ export class DashLandComponent implements OnInit {
   }
 
   goTodashland(): void {
-    this.router.navigate(['/dashland']);
+    this.router.navigate(['/bashboard']);
   }
 }

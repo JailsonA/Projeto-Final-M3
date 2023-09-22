@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../api.service'; // Certifique-se de importar o serviço
 
@@ -7,7 +7,15 @@ import { ApiService } from '../api.service'; // Certifique-se de importar o serv
   templateUrl: './dash-board.component.html',
   styleUrls: ['./dash-board.component.css']
 })
-export class DashBoardComponent {
+export class DashBoardComponent implements OnInit {
+  
+  ngOnInit(): void {
+    // Verifique o token do localStorage aqui e redirecione conforme necessário
+    if (localStorage.getItem('token') != null) {
+      this.goToDashland(); // Corrigido para redirecionar para '/dashboard'
+    }
+  }
+  
   title = 'eClinic';
   user = {
     email: null,
@@ -18,21 +26,19 @@ export class DashBoardComponent {
   constructor(private router: Router, private apiService: ApiService) {}
 
   goToDashboard(): void {
-    this.router.navigate(['/admin']);
+    this.router.navigate(['/dashboard']); // Corrigido para redirecionar para '/dashboard'
   }
 
   goToDashland(): void {
-    this.router.navigate(['/dashland']);
+    this.router.navigate(['/dashboard']);
   }
 
   async onSubmit(user: any) {
     try {
-      const response = await this.apiService.login(user); // Use this.apiService para chamar o serviço
+      const response = await this.apiService.login(user);
       if (response) {
         this.goToDashland();
       }
-      //console.log(response);
-      //localStorage.setItem('token', response);
     } catch (error) {
       console.error('Ocorreu um erro:', error);
     }
