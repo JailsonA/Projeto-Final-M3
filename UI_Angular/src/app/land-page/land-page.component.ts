@@ -14,6 +14,6 @@ export class LandPageComponent {
   // LandPageComponent
 goToDashboard(): void {
   console.log('Navegar para o Dashboard'); // Verifique se esta mensagem é registrada no console
-  this.router.navigate(['/login']);
+  this.router.navigate(['/admin']);
 }
 }

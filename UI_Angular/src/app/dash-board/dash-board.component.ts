@@ -30,7 +30,7 @@ export class DashBoardComponent implements OnInit {
   }
 
   goToDashland(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/appointments']);
   }
 
   async onSubmit(user: any) {

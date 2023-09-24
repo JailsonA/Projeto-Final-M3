@@ -1,47 +1,78 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Doctor } from './doctor.model';
+import { tap, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppointmentService {
-  private apiUrl = 'http://localhost:5242/Appointments'; // Base URL da sua API
+  private apiUrl_Appointment = 'http://localhost:5242/Appointments';
+  private apiUrl_Users = 'http://localhost:5242/Users';
   private AppointId = null;
-  
+
+
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('auth_token');
-   // console.log("Token:", token); // imprime o token para verificar
+    const token = localStorage.getItem('token');
     return new HttpHeaders({
-      'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJKV1RTZXJ2aWNlQWNjZXNzVG9rZW4iLCJqdGkiOiIzMWQwNzU5NS1kYzIzLTQ2MmMtYTU1ZS03NTJhMTQzNTMwNDkiLCJ1bmlxdWVfbmFtZSI6IndhZ25lci5oMkBob3RtYWlsLmNvbSIsIlVzZXJJZCI6IjEiLCJGdWxsTmFtZSI6InN0cmluZyIsIlVzZXJUeXBlIjoiUGF0aWVudCIsImV4cCI6MTY5NTI5NDEyOSwiaXNzIjoiSldUQXV0aGVudGljYXRpb25TZXJ2ZXIiLCJhdWQiOiJKV1RTZXJ2aWNlUG9zdG1hbkNsaWVudCJ9.-TOLSOSSYlMjHkhWXSS3fTjL9nSL1muDsxDv_M9h7Bg` // token fixo para testes
+      'Authorization': `Bearer ${token}`
     });
   }
 
-  createAppointment(doctorId: string, patientMessage: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/CreateAppointment`, { doctorId, patientMessage }, { headers: this.getHeaders() });
-  }
 
-  getAppointmentsById(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/GetAppointById`, { appointmentId: this.AppointId }, { headers: this.getHeaders() });
+  
+  createAppointment(doctorId: string, PatientMsg: string): Observable<any> {
+    const params = new HttpParams()
+        .set('doctorId', doctorId)
+        .set('patientMessage', PatientMsg);
+    
+    return this.http.post(`${this.apiUrl_Appointment}/CreateAppointment`, {}, { headers: this.getHeaders(), params: params });
+}
+
+   getAppointmentsById(): Observable<any> {
+    return this.http.post(`${this.apiUrl_Appointment}/GetAppointById`, { appointmentId: this.AppointId }, { headers: this.getHeaders() });
   }
 
   addMessageToAppointment(appointmentId: string, message: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/AddMessage`, { appointmentId, message }, { headers: this.getHeaders() });
+    return this.http.post(`${this.apiUrl_Appointment}/AddMessage`, { appointmentId, message }, { headers: this.getHeaders() });
   }
 
   getMessagesByAppointmentId(appointmentId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/GetMessageByAppointId`, { appointmentId }, { headers: this.getHeaders() });
+    return this.http.post(`${this.apiUrl_Appointment}/GetMessageByAppointId`, { appointmentId }, { headers: this.getHeaders() });
   }
 
-  finishAppointment(appointmentId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/FinishAppointment`, { appointmentId }, { headers: this.getHeaders() });
+  getDoctors(): Observable<Doctor[]> {
+    return this.http.get<Doctor[]>(`${this.apiUrl_Users}/GetAllDoctor`, { headers: this.getHeaders() })
+      .pipe(
+        tap(doctors => console.log('Doctors received:', doctors)),
+        catchError(error => {
+          console.error('Error fetching doctors:', error);
+          return throwError(error);
+        })
+      );
   }
+
+  
+  
+  finishAppointment(appointmentId: number): Observable<any> {
+    const params = new HttpParams()
+
+      .set('appointmentId', appointmentId.toString());
+
+    return this.http.post(`${this.apiUrl_Appointment}/FinishAppointment`, null, { headers: this.getHeaders(), params: params });
+}
+
 
   uploadImage(image: File): Observable<any> {
     const formData = new FormData();
     formData.append('image', image);
-    return this.http.post(`${this.apiUrl}/upload`, formData);
+    return this.http.post(`${this.apiUrl_Appointment}/upload`, formData);
   }
 }
+

@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { AppointmentCreateComponent } from './appointment-create.component';
 
 describe('AppointmentCreateComponent', () => {
