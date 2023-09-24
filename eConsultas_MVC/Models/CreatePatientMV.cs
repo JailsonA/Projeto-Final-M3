@@ -2,11 +2,9 @@
 {
     public class CreatePatientMV
     {
-        //{
-        //  "fullName": "string",
-        //  "phoneNumber": "string",
-        //  "email": "tester@example.com",
-        //  "password": "string"
-        //}
+        public string FullName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }

@@ -73,6 +73,25 @@ namespace eConsultas_MVC.Controllers
             return View();
         }
 
+        [HttpPost]
+        public IActionResult CreatePatient(CreatePatientMV createPatient)
+        {
+            string token = HttpContext.Session.GetString("Token");
+
+            var content = new StringContent(JsonConvert.SerializeObject(createPatient), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _httpClient.PostAsync("Users/Addpatient", content).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("DashLand");
+            }
+            else
+            {
+                return RedirectToAction("Erro");
+            }
+        }
+
         public IActionResult SendAppointment(int id)
         {
             //get doctor by id
@@ -243,21 +262,28 @@ namespace eConsultas_MVC.Controllers
             var content = new StringContent(JsonConvert.SerializeObject(login), Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+            HttpContext.Session.Clear();
+            //clear session Token
+            HttpContext.Session.Remove("Token");
 
             if (response.IsSuccessStatusCode)
             {
-                // Limpe a sessão
-                HttpContext.Session.Clear();
-                //clear session Token
-                HttpContext.Session.Remove("Token");
                 string responseContent = await response.Content.ReadAsStringAsync();
-                HttpContext.Session.SetString("Token", responseContent);
-                // Redirecione para a view DashLand com os dados carregados
-                return RedirectToAction("DashLand");
+                // Limpe a sessão
+                if(responseContent != null)
+                {
+                    HttpContext.Session.SetString("Token", responseContent);
+                    // Redirecione para a view DashLand com os dados carregados
+                    return RedirectToAction("DashLand");
+                }else
+                {
+                    return RedirectToAction("Index");
+                }
+                
             }
             else
             {
-                return RedirectToAction("Erro");
+                return RedirectToAction("Index");
             }
         }
 
@@ -490,8 +516,6 @@ namespace eConsultas_MVC.Controllers
                 return RedirectToAction("Erro");
             }
         }
-
-
 
 
         //logout clear session

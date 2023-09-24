@@ -91,6 +91,7 @@ namespace DataAccessLayer.Repository
             }
 
             user.CreationDate = DateTime.Now;
+            user.Status = 1;
             user.SetPasswordHash();
             _context.Users.Add(user);
             _context.SaveChanges();

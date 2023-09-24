@@ -34,10 +34,28 @@ namespace eConsultas_API.Controllers
         public IActionResult Login([FromBody] LoginModel login)
         {
 
-            if (ModelState.IsValid)
-                return Ok(_loginRepository.logIn(login));
-            else
-                return NotFound();
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var isLog = _loginRepository.logIn(login);
+                    if (isLog != null)
+                    {
+                        return Ok(isLog);
+                    }
+                    else
+                    {
+                        return NotFound("Invalid user or password");
+                    }
+                }
+                else
+                    return NotFound("Invalid user or password");
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
 

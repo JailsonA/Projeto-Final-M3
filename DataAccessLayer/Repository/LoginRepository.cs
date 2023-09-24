@@ -28,15 +28,21 @@ namespace DataAccessLayer.Repository
         /*Login*/
         public string logIn(LoginModel login)
         {
-            var user = _context.Users.FirstOrDefault(x => x.Email.ToLower() == login.Email.ToLower());
+            try
+            {
+                var user = _context.Users.FirstOrDefault(x => x.Email.ToLower() == login.Email.ToLower());
 
-            if (user != null && user.PasswordIsValid(login.Password))
-            {
-                return _genTokenFilter.GenerateToken(user);
+                if (user != null && user.PasswordIsValid(login.Password) && user.Status == 1)
+                {
+                    return _genTokenFilter.GenerateToken(user);
+                }else
+                {
+                    throw new Exception("Error to login");
+                }
             }
-            else
+            catch (Exception)
             {
-                return "Invalid user or password";
+                throw;
             }
         }
 

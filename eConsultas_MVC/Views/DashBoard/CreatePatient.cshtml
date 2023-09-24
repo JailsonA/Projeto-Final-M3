@@ -1,6 +1,7 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@model CreatePatientMV
 @{
     Layout = null;
 }
@@ -43,27 +44,27 @@
                                 <p class="text-center small">Enter your personal details to create account</p>
                             </div>
 
-                            <form class="row g-3 needs-validation" novalidate>
+                            <form method="post" class="row g-3 needs-validation" novalidate asp-controller="DashBoard" asp-action="CreatePatient">
                                 <div class="col-12">
                                     <label for="yourName" class="form-label">Full Name</label>
-                                    <input type="text" name="name" class="form-control" id="yourName" required>
+                                    <input type="text" asp-for="@Model.FullName" class="form-control" id="yourName" required>
                                     <div class="invalid-feedback">Please, enter your name!</div>
                                 </div>
 
                                 <div class="col-12">
                                     <label for="phone" class="form-label">Phone Number</label>
-                                    <input type="tel" name="phone" class="form-control" id="phone" required>
+                                    <input type="text" asp-for="@Model.PhoneNumber" class="form-control" id="phone" required>
                                     <div class="invalid-feedback">Please enter a valid Phone Number!</div>
                                 </div>
                                 <div class="col-12">
                                     <label for="yourEmail" class="form-label">Your Email</label>
-                                    <input type="email" name="email" class="form-control" id="yourEmail" required>
+                                    <input type="email" asp-for="@Model.Email" class="form-control" id="yourEmail" required>
                                     <div class="invalid-feedback">Please enter a valid Email adddress!</div>
                                 </div>
 
                                 <div class="col-12">
                                     <label for="yourPassword" class="form-label">Password</label>
-                                    <input type="password" name="password" class="form-control" id="yourPassword" required>
+                                    <input type="password" asp-for="@Model.Password" class="form-control" id="yourPassword" required>
                                     <div class="invalid-feedback">Please enter your password!</div>
                                 </div>
                                 <div class="col-12">
