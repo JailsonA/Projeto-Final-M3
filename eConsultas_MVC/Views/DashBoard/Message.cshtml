@@ -1,0 +1,201 @@
+﻿@using Newtonsoft.Json;
+@using eConsultas_MVC.Models;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+@{
+    string userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
+    var user = JsonConvert.DeserializeObject<UserMV>(userJson);
+}
+@model MessageListsMV
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active">Appointement Message</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section style="background-color: #fff;">
+    <div class="container py-5">
+
+        <div class="row">
+
+            <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
+
+                @if (user.UserType == "Doctor")
+                {
+                    <h5 class="font-weight-bold mb-3 text-center text-lg-start">Patient Info</h5>
+                }
+                else if (user.UserType == "Patient")
+                {
+                    <h5 class="font-weight-bold mb-3 text-center text-lg-start">Doctor Info</h5>
+                }
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <ul class="list-unstyled mb-0">
+                            <li class="p-2 border-bottom">
+                                <a href="#!" class="d-flex justify-content-between">
+                                    @if (user.UserType == "Patient")
+                                    {
+                                        <div class="d-flex flex-row">
+                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
+                                                 class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
+                                            <div class="pt-1">
+                                                <p class="fw-bold mb-0">@Model.Appointments.Doctor.FullName</p>
+                                                <p class="small text-muted">@Model.Appointments.Doctor.Email</p>
+                                            </div>
+                                        </div>
+                                        <div class="pt-1">
+                                            <p class="small text-muted mb-1">Tel: @Model.Appointments.Doctor.PhoneNumber</p>
+                                            <span class="badge bg-danger float-end">#@Model.Appointments.Doctor.UserId</span>
+                                        </div>
+                                    }
+                                    else if (user.UserType == "Doctor")
+                                    {
+                                        <div class="d-flex flex-row">
+                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
+                                                 class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
+                                            <div class="pt-1">
+                                                <p class="fw-bold mb-0">@Model.Appointments.Patient.FullName</p>
+                                                <p class="small text-muted">@Model.Appointments.Patient.Email</p>
+                                            </div>
+                                        </div>
+                                        <div class="pt-1">
+                                            <p class="small text-muted mb-1">Tel: @Model.Appointments.Patient.PhoneNumber</p>
+                                            <span class="badge bg-danger float-end">#@Model.Appointments.Patient.UserId</span>
+                                        </div>
+                                    }
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+
+                <div class="card bg-light mb-3" style="max-width: 26rem;">
+                    <div class="card-header">Appointment Info</div>
+                    <div class="card-body">
+                        <h5 class="card-title">@Model.Appointments.AppointId - Appointment in progess</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    </div>
+                </div>
+                <h6>PDF File List</h6>
+                <ul class="list-group list-group-light">
+                    @if (!string.IsNullOrEmpty(Model.Appointments.PDFFile))
+                    {
+                        <li class="list-group-item">#@Model.Appointments.PDFFile - PDF file added</li>
+                    }
+                    else
+                    {
+                        <li class="list-group-item">PDF file not added</li>
+                    }
+                </ul>
+                <br />
+                <form method="post" enctype="multipart/form-data" id="uploadForm" asp-controller="DashBoard" asp-action="addPdf">
+                    <label class="form-label" for="customFile">Default file pdf * <span class="badge bg-danger">Just PDF</span></label>
+                    <input type="file" class="form-control" id="file" name="file" />
+                    <input name="appoint" value="@Model.Appointments.AppointId" type="hidden" />
+                    <br />
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Upload</button>
+                    <a href="#" class="btn btn-danger"><i class="bi bi-download"></i> Download</a>
+                </form>
+                <br />
+                @if (Model.Appointments.IsCompleted)
+                {
+                    <div class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle"></i> Appointment completed
+                    </div>
+                }
+
+            </div>
+
+            <div class="col-md-6 col-lg-7 col-xl-8">
+
+                <ul class="list-unstyled">
+
+                    @foreach (var message in Model.Messages)
+                    {
+                        // Calcule a diferença em minutos
+                        var timeDifference = DateTime.Now - message.TimeSend;
+                        var minutesAgo = (int)timeDifference.TotalMinutes;
+
+                        string timeAgo;
+                        if (minutesAgo < 60)
+                        {
+                            timeAgo = $"{minutesAgo} mins ago";
+                        }
+                        else if (minutesAgo < 1440) // Menos de 24 horas (1 dia)
+                        {
+                            var hoursAgo = minutesAgo / 60;
+                            timeAgo = $"{hoursAgo} {(hoursAgo == 1 ? "hour" : "hours")} ago";
+                        }
+                        else
+                        {
+                            var daysAgo = minutesAgo / 1440;
+                            timeAgo = $"{daysAgo} {(daysAgo == 1 ? "day" : "days")} ago";
+                        }
+
+                        if (message.UserId == user.UserId)
+                        {
+                            <li class="d-flex justify-content-between mb-4">
+                                <div class="card w-100">
+                                    <div class="card-header d-flex justify-content-between p-3">
+                                        <p class="fw-bold mb-0">@message.User.FullName</p>
+                                        <p class="text-muted small mb-0"><i class="far fa-clock"></i> @timeAgo</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">
+                                            @message.Message
+                                        </p>
+                                    </div>
+                                </div>
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-5.webp" alt="avatar"
+                                     class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60">
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="d-flex justify-content-between mb-4">
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp" alt="avatar"
+                                     class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" width="60">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between p-3">
+                                        <p class="fw-bold mb-0">@message.User.FullName</p>
+                                        <p class="text-muted small mb-0"><i class="far fa-clock"></i> @timeAgo</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">
+                                            @message.Message
+                                        </p>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+
+                    }
+                    <form method="post">
+                    <li class="bg-white mb-3">
+                        <div class="form-outline">
+                            <textarea class="form-control" id="message" name="message" rows="4" @(Model.Appointments.IsCompleted ? "readonly" : "")></textarea>
+                            <label class="form-label" for="textAreaExample2">Message</label>
+                        </div>
+                    </li>
+                    <button asp-action="AddMessage" type="submit" asp-route-appointmentId="@Model.Appointments.AppointId" class="btn btn-primary btn-rounded float-end">Send</button>
+                    </form>
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+

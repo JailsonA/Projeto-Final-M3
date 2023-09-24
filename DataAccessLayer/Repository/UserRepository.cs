@@ -69,6 +69,16 @@ namespace DataAccessLayer.Repository
             else return true;
         }
 
+        public bool IsFile(FileUser image, int userId, int appointId)
+        {
+            List<string> permExtensions = new List<string> { ".PDF", ".pdf" };
+            string uploadDirectory = "pdf/upload";
+            ImgToDir imgToDir = new ImgToDir();
+            string isUpload = imgToDir.CopyPdf(image.imageFile, permExtensions, uploadDirectory, _context, userId, appointId);
+            if (string.IsNullOrEmpty(isUpload)) return false;
+            else return true;
+        }
+
         /*Metodos Genericos Users*/
         // add user
         public T AddUserGen<T>(T user) where T : UserModel

@@ -10,4 +10,9 @@
     <Folder Include="wwwroot\DashBoard\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.0-preview.1.21102.2" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ApiService } from '../api.service'; 
 
 @Component({
   selector: 'app-dash-land',
@@ -8,17 +9,25 @@ import { Router } from '@angular/router';
 })
 export class DashLandComponent implements OnInit {
   title = 'eClinic';
+  
+  appoint = {
+    doctorId: null,
+    message: null
+  };
+  constructor(private router: Router, private apiService: ApiService) {}
 
-  constructor(private router: Router) {}
+  ngOnInit() {}
 
-  ngOnInit(): void {
-    const token = localStorage.getItem('token');
-    if (token === null) {
-      this.router.navigate(['/']);
+  async onSubmit(appoint: any) {
+    try {
+      debugger;
+      const resp = this.appoint;
+      const response = await this.apiService.CreateAppoint(appoint);
+      if (resp) {
+        console.log(resp);
+      }
+    } catch (error) {
+      console.error('Ocorreu um erro:', error);
     }
-  }
-
-  goTodashland(): void {
-    this.router.navigate(['/bashboard']);
   }
 }

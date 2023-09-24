@@ -109,7 +109,7 @@ namespace eConsultas_API.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [UserAcess]
         public IActionResult GetMessageByAppointId(string appointmentId, [FromHeader(Name = "Authorization")] string authorizationHeader)
         {
@@ -194,21 +194,5 @@ namespace eConsultas_API.Controllers
                 return BadRequest("Error sending image");
             }
         }
-
-        //aberto para teste depois apagar o metodo
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadFile(IFormFile file)
-        {
-            FileUser image = new FileUser();
-            image.imageFile = file;
-            int userId = 1;
-            bool isSend = _appointmentRepository.IsFileCopy(image, userId);
-            if (!isSend)
-            {
-                return BadRequest("Error sending image");
-            }
-            return Ok(new { message = "Arquivo enviado com sucesso!" });
-        }
-
     }
 }

@@ -9,6 +9,7 @@ using DataAccessLayer.Data.Enum;
 using static System.Net.Mime.MediaTypeNames;
 using System.Numerics;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace eConsultas_API.Controllers
 {
@@ -141,14 +142,6 @@ namespace eConsultas_API.Controllers
             return Ok(patient);
         }
 
-        [HttpGet]
-        [PrivilegeUser("Admin")]
-        public IActionResult GetAllDoctor([FromHeader(Name = "Authorization")] string authorizationHeader)
-        {
-            return Ok(_userRepository.GetAllUsersGen<DoctorModel>());
-        }
-
-
         /* Doctor Section */
         [HttpPut]
         [PrivilegeUser("Doctor")]
@@ -237,6 +230,50 @@ namespace eConsultas_API.Controllers
             }
         }
 
+        [HttpPut]
+        [UserAcess]
+        public IActionResult addPdf(IFormFile file, int appoint, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        {
+            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Invalid token");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var loggedUser = _decToken.GetLoggedUser(token);
+
+            if (loggedUser == null)
+            {
+                return NotFound("Invalid user or password");
+            }
+            int userId = loggedUser.UserId;
+            FileUser image = new FileUser();
+            image.imageFile = file;
+            image.UserId = userId;
+            bool isSend = _userRepository.IsFile(image, userId, appoint);
+            if (isSend)
+            {
+                return Ok("Image send successfully");
+            }
+            else
+            {
+                return BadRequest("Error sending image");
+            }
+        }
+
+        [HttpGet]
+        [UserAcess]
+        public IActionResult GetAllDoctor([FromHeader(Name = "Authorization")] string authorizationHeader)
+        {
+            return Ok(_userRepository.GetAllUsersGen<DoctorModel>());
+        }
+
         /* metodos aberto sem restrinção*/
         [HttpPost]
         public IActionResult AddPatient(PatientModel patient)
@@ -256,20 +293,6 @@ namespace eConsultas_API.Controllers
                 return BadRequest("Invalid model state");
             }
         }
-
-
-
-        //aberto para teste depois apagar o metodo
-        [HttpPost("upload")]
-        public async Task<IActionResult> UploadFile(IFormFile file)
-        {
-            FileUser image = new FileUser();
-            image.imageFile = file;
-            int userId = 1;
-            bool isSend = _userRepository.IsFileCopy(image, userId);
-            return Ok(new { message = "Arquivo enviado com sucesso!" });
-        }
-
 
         /*testar metodo logger*/
         private bool loggers(string msg, string authorizationHeader)

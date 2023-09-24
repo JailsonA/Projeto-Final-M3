@@ -40,8 +40,8 @@ namespace eConsultas_API.Controllers
                 return NotFound();
         }
 
-        //so para teste
-        /*[PrivilegeUser("Admin")] // Adicionado para autorização de acesso privilégiado   aqui tem 2 validation um dentro outro fora
+
+        [UserAcess]
         [HttpPost]
         public IActionResult GetUserLogged([FromHeader(Name = "Authorization")] string authorizationHeader)
         {
@@ -55,7 +55,7 @@ namespace eConsultas_API.Controllers
                 }
             }
             return BadRequest("Invalid token");
-        }*/
+        }
 
         [UserAcess]
         [HttpPost]

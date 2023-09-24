@@ -23,22 +23,35 @@ export class ApiService {
     });
   }
 
-  /* async login(user: any): Promise<any> {
-    try {
-      const apiUrl = '/Login/Login'; // Use o caminho relativo em relação à baseURL
-      const response = await this.axiosInstance.post(apiUrl, user); // Use this.axiosInstance
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  } */
-
   async login(user: any): Promise<any> {
     try {
       const apiUrl = '/Login/Login';
       const response = await this.axiosInstance.post(apiUrl, user);
       //console.log('Response:', response);
       localStorage.setItem('token', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error:', error);
+      throw error;
+    }
+  }
+
+  /* async CreateAppoint(appoint: any): Promise<any> {
+    try {
+      const apiUrl = '/Appointments/CreateAppointment';
+      const data = { doctorId: appoint.doctorId, patientMessage: appoint.patientMessage };
+      const response = await this.axiosInstance.post(apiUrl, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error:', error);
+      throw error;
+    }
+  } */
+
+  async CreateAppoint(appoint: any): Promise<any> {
+    try {
+      const apiUrl = `/Appointments/CreateAppointment?doctorId=${appoint.doctorId}&patientMessage=${encodeURIComponent(appoint.patientMessage)}`;
+      const response = await this.axiosInstance.post(apiUrl);
       return response.data;
     } catch (error) {
       console.error('Error:', error);

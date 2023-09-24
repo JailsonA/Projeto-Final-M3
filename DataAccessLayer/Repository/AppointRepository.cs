@@ -181,7 +181,7 @@ namespace DataAccessLayer.Repository
             catch (Exception ex)
             {
                 transaction.Rollback();
-                throw new Exception("Error add Message");
+                throw new Exception("Error add Message " + ex);
             }
         }
 
@@ -226,6 +226,24 @@ namespace DataAccessLayer.Repository
             string isUpload = imgToDir.CopyFile(pdfFile.imageFile, permExtensions, uploadDirectory, _context, userId);
             if (string.IsNullOrEmpty(isUpload)) return false;
             else return true;
+        }
+
+        //download pdf file
+        public string GetPdfFilePath(int appointId)
+        {
+            var appoint = _context.Appointments.Find(appointId);
+
+            if (appoint != null)
+            {
+                var fileUser = _context.ImgUser.Find(int.Parse(appoint.PDFFile));
+
+                if (fileUser != null)
+                {
+                    return Path.Combine("wwwroot", "pdf", "upload", fileUser.ImageUrl);
+                }
+            }
+
+            return null;
         }
     }
 }
