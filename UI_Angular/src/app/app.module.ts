@@ -1,21 +1,34 @@
+// app.module.ts
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common'; 
+import { HttpClientModule } from '@angular/common/http'; 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { AppointmentModule } from './dash-board/Appointment-module';
+import { FormsModule } from '@angular/forms';
+
+
+// Componentes adicionados pelo seu colega
 import { LandPageComponent } from './land-page/land-page.component';
-import { DashLandModule } from './dash-land/dash-land.module'; // Certifique-se de importar o DashLandModule
+import { DashLandComponent } from './dash-land/dash-land.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    LandPageComponent
+    LandPageComponent,
+    DashLandComponent,
+    // ... outros componentes ...
   ],
   imports: [
     BrowserModule,
+    CommonModule, // Para resolver o problema com o pipe 'date'.
     AppRoutingModule,
-    DashLandModule, // Adicione o DashLandModule aqui
+    HttpClientModule,
+    AppointmentModule,
+    FormsModule  // Adicione esta linha
+
   ],
-  providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}
