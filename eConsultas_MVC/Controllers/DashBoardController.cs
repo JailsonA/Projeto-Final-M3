@@ -517,6 +517,41 @@ namespace eConsultas_MVC.Controllers
             }
         }
 
+        /* updates users info*/
+
+        public IActionResult UpdateUser()
+        {
+            string token = HttpContext.Session.GetString("Token");
+            var user = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                
+                if (user.UserType == "Doctor")
+                {
+                    var viewModel = new UsersInfo
+                    {
+                        User = user,
+                        Doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == user.UserId)
+                    };
+                    return View(viewModel);
+                }
+                else if (user.UserType == "Patient")
+                {
+                    var viewModel = new UsersInfo
+                    {
+                        User = user
+                    };
+                    return View(viewModel);
+                }
+                
+            }
+            return RedirectToAction("Index");
+        }
+
 
         //logout clear session
         public IActionResult Logout()
