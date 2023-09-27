@@ -7,6 +7,11 @@
     string userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
     var user = JsonConvert.DeserializeObject<UserMV>(userJson);
     string imgUrl = HttpContextAccessor.HttpContext.Session.GetString("UserImg");
+    string isImg = null;
+    if (imgUrl != null)
+    {
+        isImg = imgUrl;
+    }
 }
 
 <div class="pagetitle">
@@ -27,18 +32,18 @@
                 <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
                     <!-- Se ImgUrl não for nulo ou vazio, exiba a imagem -->
-                    @if (!string.IsNullOrEmpty(imgUrl))
+                    @if (!string.IsNullOrEmpty(isImg))
                     {
-                        <img src="@Url.Content(imgUrl)" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
+                        <img src="@Url.Content(isImg)" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
                     }
                     else
                     {
-                        <img src="@Url.Content("~/DashBoard/img/defaultUser.png")" class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60" />
+                        <img src="@Url.Content("~/DashBoard/img/defaultUser.png")" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
                     }
 
                     <h2>@Model.User.FullName</h2>
                     <h3>@Model.User.UserType</h3>
-                    <form class="row" method="post" enctype="multipart/form-data" id="uploadForm" asp-controller="DashBoard" asp-action="AddImage">
+                    <form class="row" method="post" enctype="multipart/form-data" id="uploadForm" asp-controller="DashBoard" asp-action="AddFile">
                         <div class="col-md-8">
                             <label class="form-label" for="customFile">Default file (jpg - JPEG - PNG)</label>
                             <input type="file" class="form-control" id="file" name="file" />

@@ -5,6 +5,11 @@
     string userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
     var user = JsonConvert.DeserializeObject<UserMV>(userJson);
     string imgUrl = HttpContextAccessor.HttpContext.Session.GetString("UserImg");
+    string isImg = null;
+    if (imgUrl != null)
+    {
+        isImg = imgUrl;
+    }
 }
 
 <!DOCTYPE html>
@@ -207,13 +212,13 @@
                 <li class="nav-item dropdown pe-3">
 
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                        @if (!string.IsNullOrEmpty(imgUrl))
+                        @if (!string.IsNullOrEmpty(isImg))
                         {
-                            <img src="@(Url.Content(imgUrl))" alt="Profile" class="rounded-circle">
+                            <img src="@Url.Content(isImg)" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
                         }
                         else
                         {
-                            <img src="~/assets/img/avatars/avatar-1.jpg" alt="Profile" class="rounded-circle">
+                            <img src="@Url.Content("~/DashBoard/img/defaultUser.png")" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
                         }
                         <span class="d-none d-md-block dropdown-toggle ps-2">@user.FullName</span>
                     </a><!-- End Profile Iamge Icon -->

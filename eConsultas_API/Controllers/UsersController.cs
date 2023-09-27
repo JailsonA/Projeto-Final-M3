@@ -85,6 +85,7 @@ namespace eConsultas_API.Controllers
             return Ok(_userRepository.DeleteUserGen<DoctorModel>(user.UserId));
         }
 
+
         [HttpGet]
         [PrivilegeUser("Admin")]
         public IActionResult GetDoctorByEmail(string email)
@@ -92,6 +93,48 @@ namespace eConsultas_API.Controllers
             return Ok(_userRepository.GetUserByEmailGen<DoctorModel>(email));
         }
 
+        /* Doctor Section */
+        [HttpPost]
+        [PrivilegeUser("Doctor")]
+        public IActionResult UpdateDoctor([FromHeader(Name = "Authorization")] string authorizationHeader, [FromBody] DoctorUpdateInfo doctor)
+        {
+
+            // Verifique se o token é válido e obtenha o usuário logado.
+            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+            var userLogged = _decToken.GetLoggedUser(token);
+            if (userLogged == null)
+            {
+                return BadRequest("Token inválido ou usuário não encontrado.");
+            }
+
+            // Verifique se o usuário a ser atualizado existe.
+            var userToUpdate = _userRepository.GetUserByIdGen<DoctorModel>(userLogged.UserId);
+            if (userToUpdate == null)
+            {
+                return BadRequest("Usuário a ser atualizado não encontrado.");
+            }
+
+            // Atualize as propriedades do usuário com os valores do objeto "doctor".
+            if (doctor.Especialization != null) userToUpdate.Especialization = doctor.Especialization;
+            if (doctor.Fees != null) userToUpdate.Fees = doctor.Fees;
+            if (doctor.AdInfo != null) userToUpdate.AdInfo = doctor.AdInfo;
+            if (doctor.Region != null) userToUpdate.Region = doctor.Region;
+            if (doctor.City != null) userToUpdate.City = doctor.City;
+            if (doctor.Address != null) userToUpdate.Address = doctor.Address;
+
+            if (userToUpdate != null)
+            {
+                string msg = "Update doctor" + doctor.DoctorUserId;
+                if (!loggers(msg, authorizationHeader)) return BadRequest("Invalid token");
+                return Ok(_userRepository.UpdateUserGen<DoctorModel>(userToUpdate));
+            }
+            else
+                return NotFound();
+        }
+
+
+
+        /* Patient Section */
         [HttpGet]
         [PrivilegeUser("Admin")]
         public IActionResult GetAllPatient()
@@ -143,50 +186,6 @@ namespace eConsultas_API.Controllers
 
             return Ok(patient);
         }
-
-        /* Doctor Section */
-        [HttpPost]
-        [PrivilegeUser("Doctor")]
-        public IActionResult UpdateDoctor([FromHeader(Name = "Authorization")] string authorizationHeader, [FromBody] DoctorUpdateInfo doctor)
-        {
-
-            // Verifique se o token é válido e obtenha o usuário logado.
-            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
-            var userLogged = _decToken.GetLoggedUser(token);
-            if (userLogged == null)
-            {
-                return BadRequest("Token inválido ou usuário não encontrado.");
-            }
-
-            // Verifique se o usuário a ser atualizado existe.
-            var userToUpdate = _userRepository.GetUserByIdGen<DoctorModel>(userLogged.UserId);
-            if (userToUpdate == null)
-            {
-                return BadRequest("Usuário a ser atualizado não encontrado.");
-            }
-
-            // Atualize as propriedades do usuário com os valores do objeto "doctor".
-            if (doctor.Especialization != null) userToUpdate.Especialization = doctor.Especialization;
-            if (doctor.Fees != null) userToUpdate.Fees = doctor.Fees;
-            if (doctor.AdInfo != null) userToUpdate.AdInfo = doctor.AdInfo;
-            if (doctor.Region != null) userToUpdate.Region = doctor.Region;
-            if (doctor.City != null) userToUpdate.City = doctor.City;
-            if (doctor.Address != null) userToUpdate.Address = doctor.Address;
-
-            if (userToUpdate != null)
-            {
-                string msg = "Update doctor" + doctor.DoctorUserId;
-                if (!loggers(msg, authorizationHeader)) return BadRequest("Invalid token");
-                return Ok(_userRepository.UpdateUserGen<DoctorModel>(userToUpdate));
-            }
-            else
-                return NotFound();
-        }
-
-
-        /* Patient Section user acess*/
-
-
 
         [HttpGet]
         [UserAcess]

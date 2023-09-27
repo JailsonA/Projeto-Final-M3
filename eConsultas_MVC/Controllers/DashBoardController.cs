@@ -35,6 +35,7 @@ namespace eConsultas_MVC.Controllers
 
         public async Task<IActionResult> DashLand()
         {
+            string userImg = null;
             await Task.Delay(TimeSpan.FromSeconds(1)); // Atraso de 2 segundos
             string _token = HttpContext.Session.GetString("Token");
             if (string.IsNullOrEmpty(_token))
@@ -49,8 +50,11 @@ namespace eConsultas_MVC.Controllers
                 var getUser = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
                 var img = GetAllUserFiles("/img/").Result;
 
-                string userImg = img.FirstOrDefault(x => x.UserId == getUser.UserId)?.ImageUrl;
-                HttpContext.Session.SetString("UserImg", userImg);
+                userImg = img.FirstOrDefault(x => x.UserId == getUser.UserId)?.ImageUrl;
+                if (!string.IsNullOrEmpty(userImg))
+                {
+                    HttpContext.Session.SetString("UserImg", userImg);
+                }
 
                 var viewModel = new DashboardMV
                 {
@@ -489,43 +493,6 @@ namespace eConsultas_MVC.Controllers
             }
         }
 
-        // send pdf to endpoint Users/addPdf sendinding IFormFile and appointmentId
-        [HttpPost]
-        public async Task<IActionResult> AddPdf(IFormFile file, int appoint)
-        {
-            string token = HttpContext.Session.GetString("Token");
-
-            try
-            {
-                using (var content = new MultipartFormDataContent())
-                {
-                    // Adicione o arquivo à solicitação
-                    content.Add(new StreamContent(file.OpenReadStream()), "file", file.FileName);
-
-                    // Configure os cabeçalhos HTTP com autorização
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                    // Faça a solicitação PUT com o conteúdo do arquivo
-                    HttpResponseMessage response = await _httpClient.PutAsync($"Users/addPdf?appoint={appoint}", content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction("Message", "DashBoard", new { id = appoint });
-                    }
-                    else
-                    {
-                        return RedirectToAction("Erro");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions as needed
-                return RedirectToAction("Erro");
-            }
-        }
-
-
 
         /* updates users info*/
 
@@ -667,7 +634,7 @@ namespace eConsultas_MVC.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return RedirectToAction("UpdateUser");
+                    return RedirectToAction("DashLand");
                 }
                 else
                 {

@@ -24,7 +24,7 @@ namespace DataAccessLayer.Data
             if (!optionsBuilder.IsConfigured)
             {
                 // Obtenha a string de conexão do arquivo de configuração específico do DAL 
-                var connectionString = "Data Source=DEV_PC;Initial Catalog=DB_eClinica;Trusted_Connection=True;TrustServerCertificate=True;"; //cn martelado
+                var connectionString = "Data Source=DEV_PC;Initial Catalog=teste_eClinica;Trusted_Connection=True;TrustServerCertificate=True;"; //cn martelado
                 //var connectionString = DalConfiguration.ConnectionString; // cn dinâmico
                 optionsBuilder.UseSqlServer(connectionString);
             }

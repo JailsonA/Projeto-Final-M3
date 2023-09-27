@@ -70,7 +70,7 @@ namespace DataAccessLayer.Migrations
                     b.ToTable("Appointments");
                 });
 
-            modelBuilder.Entity("DataAccessLayer.Model.ImageUser", b =>
+            modelBuilder.Entity("DataAccessLayer.Model.FileUser", b =>
                 {
                     b.Property<int>("ImgId")
                         .ValueGeneratedOnAdd()
@@ -102,7 +102,7 @@ namespace DataAccessLayer.Migrations
                     b.Property<int>("AppointId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Content")
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -218,7 +218,7 @@ namespace DataAccessLayer.Migrations
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("DataAccessLayer.Model.ImageUser", b =>
+            modelBuilder.Entity("DataAccessLayer.Model.FileUser", b =>
                 {
                     b.HasOne("DataAccessLayer.Model.UserModel", "User")
                         .WithMany()

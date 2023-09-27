@@ -35,9 +35,10 @@ namespace DataAccessLayer.Repository
                 if (user != null && user.PasswordIsValid(login.Password) && user.Status == 1)
                 {
                     return _genTokenFilter.GenerateToken(user);
-                }else
+                }
+                else
                 {
-                    throw new Exception("Error to login");
+                    return null;
                 }
             }
             catch (Exception)

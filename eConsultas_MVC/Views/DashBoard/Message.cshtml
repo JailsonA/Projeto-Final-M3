@@ -250,7 +250,10 @@
                             <label class="form-label" for="textAreaExample2">Message</label>
                         </div>
                     </li>
-                    <button asp-action="AddMessage" type="submit" asp-route-appointmentId="@Model.Appointments.AppointId" class="btn btn-primary btn-rounded float-end">Send</button>
+                        @if (!Model.Appointments.IsCompleted)
+                        {
+                        <button asp-action="AddMessage" type="submit" asp-route-appointmentId="@Model.Appointments.AppointId" class="btn btn-primary btn-rounded float-end">Send</button>
+                        }
                     </form>
                 </ul>
 
