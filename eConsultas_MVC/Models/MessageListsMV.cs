@@ -4,6 +4,6 @@
     {
         public List<MessageMV> Messages { get; set; }
         public AppointmentMV Appointments { get; set; }
-        public List<FileMV> Files { get; set; }
+        public List<FileMV> FilesImg { get; set; }
     }
 }

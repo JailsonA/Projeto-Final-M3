@@ -62,22 +62,21 @@ namespace DataAccessLayer.Repository
         public bool IsFileCopy(FileUser image, int userId)
         {
             List<string> permExtensions = new List<string> { ".jpeg", ".png", ".jpg" };
-            string uploadDirectory = "img/Upload";
             ImgToDir imgToDir = new ImgToDir();
-            string isUpload = imgToDir.CopyFile(image.imageFile, permExtensions, uploadDirectory, _context, userId);
+            string isUpload = imgToDir.CopyFile(image, permExtensions, _context, userId);
             if (string.IsNullOrEmpty(isUpload)) return false;
             else return true;
         }
 
-        public bool IsFile(FileUser image, int userId, int appointId)
-        {
-            List<string> permExtensions = new List<string> { ".PDF", ".pdf" };
-            string uploadDirectory = "pdf/upload";
-            ImgToDir imgToDir = new ImgToDir();
-            string isUpload = imgToDir.CopyPdf(image.imageFile, permExtensions, uploadDirectory, _context, userId, appointId);
-            if (string.IsNullOrEmpty(isUpload)) return false;
-            else return true;
-        }
+        //public bool IsFile(FileUser image, int userId, int appointId)
+        //{
+        //    List<string> permExtensions = new List<string> { ".PDF", ".pdf" };
+        //    string uploadDirectory = "pdf/upload";
+        //    ImgToDir imgToDir = new ImgToDir();
+        //    string isUpload = imgToDir.CopyPdf(image.imageFile, permExtensions, uploadDirectory, _context, userId, appointId);
+        //    if (string.IsNullOrEmpty(isUpload)) return false;
+        //    else return true;
+        //}
 
         /*Metodos Genericos Users*/
         // add user
@@ -163,6 +162,12 @@ namespace DataAccessLayer.Repository
             return existingUser;
         }
 
+        //GetImage by userId and return image path
+        public List<FileUser> GetImage()
+        {
+            var userImg = _context.ImgUser.ToList();
+            return userImg;
+        }
 
 
     }

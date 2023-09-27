@@ -28,7 +28,8 @@ namespace DataAccessLayer.Interface
 
         /* extra */
         bool IsFileCopy(FileUser image, int userId);
-        bool IsFile(FileUser image, int userId, int appointId);
+        //bool IsFile(FileUser image, int userId, int appointId);
+        List<FileUser> GetImage();
 
     }
 }

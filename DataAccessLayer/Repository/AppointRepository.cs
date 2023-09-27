@@ -218,15 +218,15 @@ namespace DataAccessLayer.Repository
             }
         }
 
-        public bool IsFileCopy(FileUser pdfFile, int userId)
-        {
-            List<string> permExtensions = new List<string> { ".pdf", ".PDF" };
-            string uploadDirectory = "pdf/Upload";
-            ImgToDir imgToDir = new ImgToDir();
-            string isUpload = imgToDir.CopyFile(pdfFile.imageFile, permExtensions, uploadDirectory, _context, userId);
-            if (string.IsNullOrEmpty(isUpload)) return false;
-            else return true;
-        }
+        //public bool IsFileCopy(FileUser pdfFile, int userId)
+        //{
+        //    List<string> permExtensions = new List<string> { ".pdf", ".PDF" };
+        //    string uploadDirectory = "pdf/Upload";
+        //    ImgToDir imgToDir = new ImgToDir();
+        //    string isUpload = imgToDir.CopyFile(pdfFile.imageFile, permExtensions, uploadDirectory, _context, userId);
+        //    if (string.IsNullOrEmpty(isUpload)) return false;
+        //    else return true;
+        //}
 
         //download pdf file
         public string GetPdfFilePath(int appointId)

@@ -10,6 +10,8 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Numerics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
+using Newtonsoft.Json.Linq;
 
 namespace eConsultas_API.Controllers
 {
@@ -143,15 +145,39 @@ namespace eConsultas_API.Controllers
         }
 
         /* Doctor Section */
-        [HttpPut]
+        [HttpPost]
         [PrivilegeUser("Doctor")]
-        public IActionResult UpdateDoctor([FromBody] DoctorModel doctor, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        public IActionResult UpdateDoctor([FromHeader(Name = "Authorization")] string authorizationHeader, [FromBody] DoctorUpdateInfo doctor)
         {
-            if (ModelState.IsValid)
+
+            // Verifique se o token é válido e obtenha o usuário logado.
+            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+            var userLogged = _decToken.GetLoggedUser(token);
+            if (userLogged == null)
             {
-                string msg = "Delet doctor" + doctor.UserId;
+                return BadRequest("Token inválido ou usuário não encontrado.");
+            }
+
+            // Verifique se o usuário a ser atualizado existe.
+            var userToUpdate = _userRepository.GetUserByIdGen<DoctorModel>(userLogged.UserId);
+            if (userToUpdate == null)
+            {
+                return BadRequest("Usuário a ser atualizado não encontrado.");
+            }
+
+            // Atualize as propriedades do usuário com os valores do objeto "doctor".
+            if (doctor.Especialization != null) userToUpdate.Especialization = doctor.Especialization;
+            if (doctor.Fees != null) userToUpdate.Fees = doctor.Fees;
+            if (doctor.AdInfo != null) userToUpdate.AdInfo = doctor.AdInfo;
+            if (doctor.Region != null) userToUpdate.Region = doctor.Region;
+            if (doctor.City != null) userToUpdate.City = doctor.City;
+            if (doctor.Address != null) userToUpdate.Address = doctor.Address;
+
+            if (userToUpdate != null)
+            {
+                string msg = "Update doctor" + doctor.DoctorUserId;
                 if (!loggers(msg, authorizationHeader)) return BadRequest("Invalid token");
-                return Ok(_userRepository.UpdateUserGen<DoctorModel>(doctor));
+                return Ok(_userRepository.UpdateUserGen<DoctorModel>(userToUpdate));
             }
             else
                 return NotFound();
@@ -196,76 +222,44 @@ namespace eConsultas_API.Controllers
             }
         }
 
-        [HttpPut]
-        [UserAcess]
-        public IActionResult addImage(FileUser image, [FromHeader(Name = "Authorization")] string authorizationHeader)
-        {
-            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+        
 
-            if (string.IsNullOrEmpty(token))
-            {
-                return BadRequest("Invalid token");
-            }
+        //[HttpPut]
+        //[UserAcess]
+        //public IActionResult addPdf(IFormFile file, int appoint, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        //{
+        //    string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (string.IsNullOrEmpty(token))
+        //    {
+        //        return BadRequest("Invalid token");
+        //    }
 
-            var loggedUser = _decToken.GetLoggedUser(token);
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (loggedUser == null)
-            {
-                return NotFound("Invalid user or password");
-            }
-            int userId = loggedUser.UserId;
-            bool isSend = _userRepository.IsFileCopy(image, userId);
-            if (isSend)
-            {
-                return Ok("Image send successfully");
-            }
-            else
-            {
-                return BadRequest("Error sending image");
-            }
-        }
+        //    var loggedUser = _decToken.GetLoggedUser(token);
 
-        [HttpPut]
-        [UserAcess]
-        public IActionResult addPdf(IFormFile file, int appoint, [FromHeader(Name = "Authorization")] string authorizationHeader)
-        {
-            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
-
-            if (string.IsNullOrEmpty(token))
-            {
-                return BadRequest("Invalid token");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var loggedUser = _decToken.GetLoggedUser(token);
-
-            if (loggedUser == null)
-            {
-                return NotFound("Invalid user or password");
-            }
-            int userId = loggedUser.UserId;
-            FileUser image = new FileUser();
-            image.imageFile = file;
-            image.UserId = userId;
-            bool isSend = _userRepository.IsFile(image, userId, appoint);
-            if (isSend)
-            {
-                return Ok("Image send successfully");
-            }
-            else
-            {
-                return BadRequest("Error sending image");
-            }
-        }
+        //    if (loggedUser == null)
+        //    {
+        //        return NotFound("Invalid user or password");
+        //    }
+        //    int userId = loggedUser.UserId;
+        //    FileUser image = new FileUser();
+        //    image.imageFile = file;
+        //    image.UserId = userId;
+        //    bool isSend = _userRepository.IsFile(image, userId, appoint);
+        //    if (isSend)
+        //    {
+        //        return Ok("Image send successfully");
+        //    }
+        //    else
+        //    {
+        //        return BadRequest("Error sending image");
+        //    }
+        //}
 
         [HttpGet]
         [UserAcess]
@@ -293,6 +287,77 @@ namespace eConsultas_API.Controllers
                 return BadRequest("Invalid model state");
             }
         }
+
+        [HttpPost]
+        [UserAcess]
+        public IActionResult addImage(string imgUrl, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        {
+            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Invalid token");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var loggedUser = _decToken.GetLoggedUser(token);
+
+            if (loggedUser == null)
+            {
+                return NotFound("Invalid user or password");
+            }
+            int userId = loggedUser.UserId;
+            FileUser image = new FileUser();
+            image.ImageUrl = imgUrl;
+            image.UserId = userId;
+            bool isSend = _userRepository.IsFileCopy(image, userId);
+            if (isSend)
+            {
+                return Ok("Image send successfully");
+            }
+            else
+            {
+                return BadRequest("Error sending image");
+            }
+           
+        }
+
+        //receid token get user logged and return image url
+        [HttpGet]
+        [UserAcess]
+        public IActionResult GetImage([FromHeader(Name = "Authorization")] string authorizationHeader)
+        {
+            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Invalid token");
+            }
+
+            var loggedUser = _decToken.GetLoggedUser(token);
+
+            if (loggedUser == null)
+            {
+                return NotFound("Invalid user or password");
+            }
+
+            var imageFile = _userRepository.GetImage();
+
+            if (imageFile != null)
+            {
+                return Ok(imageFile);
+            }
+            else
+            {
+                return BadRequest("Error sending image");
+            }
+        }
+
+
 
         /*testar metodo logger*/
         private bool loggers(string msg, string authorizationHeader)

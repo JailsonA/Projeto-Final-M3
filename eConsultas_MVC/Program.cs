@@ -1,3 +1,5 @@
+
+using eConsultas_MVC.Utils;
 using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
-
+//addscoped
+builder.Services.AddScoped<ImgToDir>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -161,38 +161,38 @@ namespace eConsultas_API.Controllers
             }
         }
 
-        [HttpPut]
-        [UserAcess]
-        public IActionResult addImage(FileUser image, [FromHeader(Name = "Authorization")] string authorizationHeader)
-        {
-            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+        //[HttpPut]
+        //[UserAcess]
+        //public IActionResult addImage(FileUser image, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        //{
+        //    string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
-            if (string.IsNullOrEmpty(token))
-            {
-                return BadRequest("Invalid token");
-            }
+        //    if (string.IsNullOrEmpty(token))
+        //    {
+        //        return BadRequest("Invalid token");
+        //    }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var loggedUser = _decToken.GetLoggedUser(token);
+        //    var loggedUser = _decToken.GetLoggedUser(token);
 
-            if (loggedUser == null)
-            {
-                return NotFound("Invalid user or password");
-            }
-            int userId = loggedUser.UserId;
-            bool isSend = _appointmentRepository.IsFileCopy(image, userId);
-            if (isSend)
-            {
-                return Ok("Image send successfully");
-            }
-            else
-            {
-                return BadRequest("Error sending image");
-            }
-        }
+        //    if (loggedUser == null)
+        //    {
+        //        return NotFound("Invalid user or password");
+        //    }
+        //    int userId = loggedUser.UserId;
+        //    bool isSend = _appointmentRepository.IsFileCopy(image, userId);
+        //    if (isSend)
+        //    {
+        //        return Ok("Image send successfully");
+        //    }
+        //    else
+        //    {
+        //        return BadRequest("Error sending image");
+        //    }
+        //}
     }
 }

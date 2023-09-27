@@ -1,4 +1,5 @@
 ﻿using eConsultas_MVC.Models;
+using eConsultas_MVC.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -6,18 +7,19 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace eConsultas_MVC.Controllers
 {
     public class DashBoardController : Controller
     {
         private readonly HttpClient _httpClient;
-
-        public DashBoardController()
+        private ImgToDir _imgToDir;
+        public DashBoardController(ImgToDir imgToDir)
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri("http://localhost:5242/");
-
+            _imgToDir = imgToDir;
         }
 
         public IActionResult Index()
@@ -44,7 +46,11 @@ namespace eConsultas_MVC.Controllers
                 var user = await GetUser(_token);
                 // save user in session
                 HttpContext.Session.SetString("User", JsonConvert.SerializeObject(user));
+                var getUser = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
+                var img = GetAllUserImage().Result;
 
+                string userImg = img.FirstOrDefault(x => x.UserId == getUser.UserId)?.ImageUrl;
+                HttpContext.Session.SetString("UserImg", userImg);
 
                 var viewModel = new DashboardMV
                 {
@@ -165,7 +171,8 @@ namespace eConsultas_MVC.Controllers
                 var viewMessageModel = new MessageListsMV
                 {
                     Messages = messages,// You need to implement this method
-                    Appointments = appointment
+                    Appointments = appointment,
+                    FilesImg = GetAllUserImage().Result
                 };
 
                 return View(viewMessageModel);
@@ -270,16 +277,16 @@ namespace eConsultas_MVC.Controllers
             {
                 string responseContent = await response.Content.ReadAsStringAsync();
                 // Limpe a sessão
-                if(responseContent != null)
+                if (responseContent != null)
                 {
                     HttpContext.Session.SetString("Token", responseContent);
-                    // Redirecione para a view DashLand com os dados carregados
                     return RedirectToAction("DashLand");
-                }else
+                }
+                else
                 {
                     return RedirectToAction("Index");
                 }
-                
+
             }
             else
             {
@@ -517,6 +524,8 @@ namespace eConsultas_MVC.Controllers
             }
         }
 
+
+
         /* updates users info*/
 
         public IActionResult UpdateUser()
@@ -529,13 +538,15 @@ namespace eConsultas_MVC.Controllers
             }
             else
             {
-                
+
                 if (user.UserType == "Doctor")
                 {
                     var viewModel = new UsersInfo
                     {
                         User = user,
-                        Doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == user.UserId)
+                        Doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == user.UserId),
+                        Files = GetAllUserImage().Result
+
                     };
                     return View(viewModel);
                 }
@@ -547,11 +558,149 @@ namespace eConsultas_MVC.Controllers
                     };
                     return View(viewModel);
                 }
-                
+
             }
             return RedirectToAction("Index");
         }
 
+        //update user specializations
+        [HttpPost]
+        public IActionResult UpdateUser(DoctorMV doctor)
+        {
+
+            string token = HttpContext.Session.GetString("Token");
+            // Configure o cabeçalho de autorização com o token
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var content = new StringContent(JsonConvert.SerializeObject(doctor), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _httpClient.PostAsync("Users/UpdateDoctor", content).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("UpdateUser");
+            }
+            else
+            {
+                return RedirectToAction("Erro");
+            }
+        }
+
+        //change password
+        [HttpPost]
+        public IActionResult ChangePassword(ChangePasswordMV changePassword)
+        {
+            string token = HttpContext.Session.GetString("Token");
+            // Configure o cabeçalho de autorização com o token
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var content = new StringContent(JsonConvert.SerializeObject(changePassword), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _httpClient.PostAsync("Login/ChangePwd", content).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("UpdateUser");
+            }
+            else
+            {
+                return RedirectToAction("Erro");
+            }
+        }
+
+        // add user image to endpoint Users/addImage sendinding IFormFile
+        [HttpPost]
+        public async Task<IActionResult> AddImage(IFormFile file)
+        {
+            string token = HttpContext.Session.GetString("Token");
+            string imgUrl = null;
+            try
+            {
+                List<string> permExtensions = new List<string> { ".jpeg", ".png", ".jpg" };
+                string uploadDirectory = "img/Upload";
+                if (file != null)
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                    var extension = Path.GetExtension(file.FileName).ToLower();
+
+                    if (!permExtensions.Contains(extension))
+                    {
+                        return null; // Extensão não permitida
+                    }
+
+                    fileName = fileName + "_" + DateTime.Now.ToString("yymmfff") + extension;
+                    var filePath = Path.Combine("wwwroot", uploadDirectory, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+
+                    imgUrl = filePath; // Retorna a URL da imagem
+                }
+
+                if (imgUrl == null) return RedirectToAction("Erro");
+
+                var content = new StringContent($"imgUrl={imgUrl}", Encoding.UTF8, "application/x-www-form-urlencoded");
+                // Configurar o cabeçalho de autorização no HttpClient
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+                // Fazer a chamada à API
+                HttpResponseMessage response = await _httpClient.PostAsync($"Users/addImage?imgUrl={imgUrl}", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("UpdateUser");
+                }
+                else
+                {
+                    return RedirectToAction("Erro");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Tratar exceções conforme necessário
+                return RedirectToAction("Erro");
+            }
+        }
+
+
+        //get user logged image
+        // Altere a assinatura da função para retornar uma lista de objetos FileMV
+        public async Task<List<FileMV>> GetAllUserImage()
+        {
+            string token = HttpContext.Session.GetString("Token");
+            string apiUrl = $"Users/GetImage";
+
+            try
+            {
+                // Configure o cabeçalho de autorização
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Fazer a chamada à API
+                HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    // Desserialize a resposta em uma lista de objetos FileMV
+                    List<FileMV> imageFiles = JsonConvert.DeserializeObject<List<FileMV>>(responseContent);
+                    imageFiles.ForEach(x =>
+                    {
+                        x.ImageUrl = x.ImageUrl.Replace("wwwroot", "~").Replace("\\", "/");
+                    });
+
+                    return imageFiles; // Retorna a lista de objetos FileMV com informações sobre as imagens
+                }
+                else
+                {
+                    return new List<FileMV>(); // Ou retorne uma lista vazia, indicando um erro, se necessário
+                }
+            }
+            catch (Exception ex)
+            {
+                // Lidar com o erro conforme necessário, por exemplo, retornar uma lista vazia, indicando um erro
+                return new List<FileMV>();
+            }
+        }
 
         //logout clear session
         public IActionResult Logout()

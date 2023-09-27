@@ -45,8 +45,24 @@
                                     @if (user.UserType == "Patient")
                                     {
                                         <div class="d-flex flex-row">
-                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
-                                                 class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
+                                            @{
+                                                bool logdImage = false;
+                                            }
+
+                                            @foreach (var item in Model.FilesImg)
+                                            {
+                                                if (item.UserId == @Model.Appointments.Doctor.UserId)
+                                                {
+                                                    <img src="@Url.Content(item.ImageUrl)" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
+
+                                                    logdImage = true;
+
+                                                }
+                                            }
+                                            @if (!logdImage)
+                                            {
+                                                <img src="@Url.Content("~/DashBoard/img/defaultUser.png")" class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60" />
+                                            }
                                             <div class="pt-1">
                                                 <p class="fw-bold mb-0">@Model.Appointments.Doctor.FullName</p>
                                                 <p class="small text-muted">@Model.Appointments.Doctor.Email</p>
@@ -60,8 +76,24 @@
                                     else if (user.UserType == "Doctor")
                                     {
                                         <div class="d-flex flex-row">
-                                            <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
-                                                 class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
+                                            @{
+                                                bool logdImage = false;
+                                            }
+
+                                            @foreach (var item in Model.FilesImg)
+                                            {
+                                                if (item.UserId == @Model.Appointments.Patient.UserId)
+                                                {
+                                                    <img src="@Url.Content(item.ImageUrl)" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
+
+                                                    logdImage = true;
+
+                                                }
+                                            }
+                                            @if (!logdImage)
+                                            {
+                                                <img src="@Url.Content("~/DashBoard/img/defaultUser.png")" class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60" />
+                                            }
                                             <div class="pt-1">
                                                 <p class="fw-bold mb-0">@Model.Appointments.Patient.FullName</p>
                                                 <p class="small text-muted">@Model.Appointments.Patient.Email</p>
@@ -114,6 +146,7 @@
                     </div>
                 }
 
+
             </div>
 
             <div class="col-md-6 col-lg-7 col-xl-8">
@@ -156,15 +189,45 @@
                                         </p>
                                     </div>
                                 </div>
-                                <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-5.webp" alt="avatar"
-                                     class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60">
+                                @{
+                                    bool logdImage = false;
+                                }
+
+                                @foreach (var item in Model.FilesImg)
+                                {
+                                    if (item.UserId == user.UserId)
+                                    {
+                                        <img src="@Url.Content(item.ImageUrl)" class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60" />
+
+                                        logdImage = true;
+
+                                    }
+                                }
+
+                                @if (!logdImage)
+                                {
+                                    <img src="@Url.Content("~/DashBoard/img/defaultUser.png")" class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60" />
+                                }
                             </li>
                         }
                         else
                         {
+                            bool logdImage2 = false;
+
                             <li class="d-flex justify-content-between mb-4">
-                                <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp" alt="avatar"
-                                     class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" width="60">
+                                @foreach (var item in Model.FilesImg)
+                                {
+                                    if (item.UserId == @message.User.UserId)
+                                    {
+                                        <img src=@(Url.Content(item.ImageUrl)) class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60" />
+                                        logdImage2 = true;
+                                    }
+
+                                }
+                                @if (!logdImage2)
+                                {
+                                    <img src="@Url.Content("~/DashBoard/img/defaultUser.png")" class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" width="60" />
+                                }
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between p-3">
                                         <p class="fw-bold mb-0">@message.User.FullName</p>
