@@ -130,7 +130,7 @@
                     }
                 </ul>
                 <br />
-                <form method="post" enctype="multipart/form-data" id="uploadForm" asp-controller="DashBoard" asp-action="addPdf">
+                <form method="post" enctype="multipart/form-data" id="uploadForm" asp-controller="DashBoard" asp-action="AddFile">
                     <label class="form-label" for="customFile">Default file pdf * <span class="badge bg-danger">Just PDF</span></label>
                     <input type="file" class="form-control" id="file" name="file" />
                     <input name="appoint" value="@Model.Appointments.AppointId" type="hidden" />

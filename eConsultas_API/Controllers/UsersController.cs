@@ -222,45 +222,6 @@ namespace eConsultas_API.Controllers
             }
         }
 
-        
-
-        //[HttpPut]
-        //[UserAcess]
-        //public IActionResult addPdf(IFormFile file, int appoint, [FromHeader(Name = "Authorization")] string authorizationHeader)
-        //{
-        //    string token = authorizationHeader.Substring("Bearer ".Length).Trim();
-
-        //    if (string.IsNullOrEmpty(token))
-        //    {
-        //        return BadRequest("Invalid token");
-        //    }
-
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var loggedUser = _decToken.GetLoggedUser(token);
-
-        //    if (loggedUser == null)
-        //    {
-        //        return NotFound("Invalid user or password");
-        //    }
-        //    int userId = loggedUser.UserId;
-        //    FileUser image = new FileUser();
-        //    image.imageFile = file;
-        //    image.UserId = userId;
-        //    bool isSend = _userRepository.IsFile(image, userId, appoint);
-        //    if (isSend)
-        //    {
-        //        return Ok("Image send successfully");
-        //    }
-        //    else
-        //    {
-        //        return BadRequest("Error sending image");
-        //    }
-        //}
-
         [HttpGet]
         [UserAcess]
         public IActionResult GetAllDoctor([FromHeader(Name = "Authorization")] string authorizationHeader)
@@ -290,7 +251,7 @@ namespace eConsultas_API.Controllers
 
         [HttpPost]
         [UserAcess]
-        public IActionResult addImage(string imgUrl, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        public IActionResult addFile(string fileUrl, [FromHeader(Name = "Authorization")] string authorizationHeader)
         {
             string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
@@ -312,7 +273,7 @@ namespace eConsultas_API.Controllers
             }
             int userId = loggedUser.UserId;
             FileUser image = new FileUser();
-            image.ImageUrl = imgUrl;
+            image.ImageUrl = fileUrl;
             image.UserId = userId;
             bool isSend = _userRepository.IsFileCopy(image, userId);
             if (isSend)

@@ -47,7 +47,7 @@ namespace eConsultas_MVC.Controllers
                 // save user in session
                 HttpContext.Session.SetString("User", JsonConvert.SerializeObject(user));
                 var getUser = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
-                var img = GetAllUserImage().Result;
+                var img = GetAllUserFiles("/img/").Result;
 
                 string userImg = img.FirstOrDefault(x => x.UserId == getUser.UserId)?.ImageUrl;
                 HttpContext.Session.SetString("UserImg", userImg);
@@ -172,7 +172,8 @@ namespace eConsultas_MVC.Controllers
                 {
                     Messages = messages,// You need to implement this method
                     Appointments = appointment,
-                    FilesImg = GetAllUserImage().Result
+                    FilesImg = GetAllUserFiles("/img/").Result,
+                    FilesPdf = GetAllUserFiles("/pdf/").Result
                 };
 
                 return View(viewMessageModel);
@@ -545,7 +546,7 @@ namespace eConsultas_MVC.Controllers
                     {
                         User = user,
                         Doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == user.UserId),
-                        Files = GetAllUserImage().Result
+                        //Files = GetAllUserFiles("/img/").Result
 
                     };
                     return View(viewModel);
@@ -610,43 +611,60 @@ namespace eConsultas_MVC.Controllers
 
         // add user image to endpoint Users/addImage sendinding IFormFile
         [HttpPost]
-        public async Task<IActionResult> AddImage(IFormFile file)
+        public async Task<IActionResult> AddFile(IFormFile file)
         {
+            if (file == null)
+            {
+                return RedirectToAction("Erro");
+            }
+
             string token = HttpContext.Session.GetString("Token");
-            string imgUrl = null;
+            string fileUrl = null;
+
             try
             {
-                List<string> permExtensions = new List<string> { ".jpeg", ".png", ".jpg" };
-                string uploadDirectory = "img/Upload";
-                if (file != null)
+                List<string> imageExtensions = new List<string> { ".jpeg", ".png", ".jpg" };
+                List<string> pdfExtensions = new List<string> { ".pdf" };
+
+                string uploadDirectory = null;
+
+                var fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                var extension = Path.GetExtension(file.FileName).ToLower();
+
+                if (imageExtensions.Contains(extension))
                 {
-                    var fileName = Path.GetFileNameWithoutExtension(file.FileName);
-                    var extension = Path.GetExtension(file.FileName).ToLower();
-
-                    if (!permExtensions.Contains(extension))
-                    {
-                        return null; // Extensão não permitida
-                    }
-
-                    fileName = fileName + "_" + DateTime.Now.ToString("yymmfff") + extension;
-                    var filePath = Path.Combine("wwwroot", uploadDirectory, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        file.CopyTo(stream);
-                    }
-
-                    imgUrl = filePath; // Retorna a URL da imagem
+                    uploadDirectory = "img/Upload";
+                }
+                else if (pdfExtensions.Contains(extension))
+                {
+                    uploadDirectory = "pdf/Upload";
+                }
+                else
+                {
+                    return RedirectToAction("Erro");
                 }
 
-                if (imgUrl == null) return RedirectToAction("Erro");
+                fileName = fileName + "_" + DateTime.Now.ToString("yymmfff") + extension;
+                var filePath = Path.Combine("wwwroot", uploadDirectory, fileName);
 
-                var content = new StringContent($"imgUrl={imgUrl}", Encoding.UTF8, "application/x-www-form-urlencoded");
-                // Configurar o cabeçalho de autorização no HttpClient
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                fileUrl = filePath;
+
+                if (fileUrl == null)
+                {
+                    return RedirectToAction("Erro");
+                }
+
+                var content = new StringContent($"fileUrl={fileUrl}", Encoding.UTF8, "application/x-www-form-urlencoded");
+
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-                // Fazer a chamada à API
-                HttpResponseMessage response = await _httpClient.PostAsync($"Users/addImage?imgUrl={imgUrl}", content);
+                HttpResponseMessage response = await _httpClient.PostAsync($"Users/addFile?fileUrl={fileUrl}", content);
+
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction("UpdateUser");
@@ -658,49 +676,45 @@ namespace eConsultas_MVC.Controllers
             }
             catch (Exception ex)
             {
-                // Tratar exceções conforme necessário
                 return RedirectToAction("Erro");
             }
         }
 
 
+
         //get user logged image
-        // Altere a assinatura da função para retornar uma lista de objetos FileMV
-        public async Task<List<FileMV>> GetAllUserImage()
+        public async Task<List<FileMV>> GetAllUserFiles(string directory)
         {
             string token = HttpContext.Session.GetString("Token");
             string apiUrl = $"Users/GetImage";
 
             try
             {
-                // Configure o cabeçalho de autorização
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                // Fazer a chamada à API
                 HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    // Desserialize a resposta em uma lista de objetos FileMV
-                    List<FileMV> imageFiles = JsonConvert.DeserializeObject<List<FileMV>>(responseContent);
-                    imageFiles.ForEach(x =>
-                    {
-                        x.ImageUrl = x.ImageUrl.Replace("wwwroot", "~").Replace("\\", "/");
-                    });
+                    List<FileMV> files = JsonConvert.DeserializeObject<List<FileMV>>(responseContent);
 
-                    return imageFiles; // Retorna a lista de objetos FileMV com informações sobre as imagens
+                    files.ForEach(x => x.ImageUrl = x.ImageUrl.Replace("wwwroot\\", "~/"));
+                    files.ForEach(x => x.ImageUrl = x.ImageUrl.Replace("\\", "/"));
+
+                    return files;
                 }
                 else
                 {
-                    return new List<FileMV>(); // Ou retorne uma lista vazia, indicando um erro, se necessário
+                    return new List<FileMV>();
                 }
             }
             catch (Exception ex)
             {
-                // Lidar com o erro conforme necessário, por exemplo, retornar uma lista vazia, indicando um erro
                 return new List<FileMV>();
             }
         }
+
+
 
         //logout clear session
         public IActionResult Logout()

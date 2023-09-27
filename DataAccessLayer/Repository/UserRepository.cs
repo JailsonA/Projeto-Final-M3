@@ -59,24 +59,32 @@ namespace DataAccessLayer.Repository
             return doctors;
         }
 
-        public bool IsFileCopy(FileUser image, int userId)
+        public bool IsFileCopy(FileUser image, int userId, int? appoint = null)
         {
-            List<string> permExtensions = new List<string> { ".jpeg", ".png", ".jpg" };
-            ImgToDir imgToDir = new ImgToDir();
-            string isUpload = imgToDir.CopyFile(image, permExtensions, _context, userId);
-            if (string.IsNullOrEmpty(isUpload)) return false;
-            else return true;
-        }
+            if (image != null)
+            {
+                var imageUser = new FileUser
+                {
+                    ImageUrl = image.ImageUrl,
+                    UserId = userId
+                };
+                _context.ImgUser.Add(imageUser);
+                _context.SaveChanges();
 
-        //public bool IsFile(FileUser image, int userId, int appointId)
-        //{
-        //    List<string> permExtensions = new List<string> { ".PDF", ".pdf" };
-        //    string uploadDirectory = "pdf/upload";
-        //    ImgToDir imgToDir = new ImgToDir();
-        //    string isUpload = imgToDir.CopyPdf(image.imageFile, permExtensions, uploadDirectory, _context, userId, appointId);
-        //    if (string.IsNullOrEmpty(isUpload)) return false;
-        //    else return true;
-        //}
+                if (appoint != null)
+                {
+                    // update pdf file on table appointment model PDFFile
+                    var pdfFile = _context.Appointments.FirstOrDefault(x => x.AppointId == appoint);
+                    pdfFile.PDFFile = imageUser.ImgId.ToString();
+                    _context.Appointments.Update(pdfFile);
+                    _context.SaveChanges();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
 
         /*Metodos Genericos Users*/
         // add user
