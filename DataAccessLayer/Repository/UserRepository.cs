@@ -59,7 +59,7 @@ namespace DataAccessLayer.Repository
             return doctors;
         }
 
-        
+
 
         /*Metodos Genericos Users*/
         // add user
@@ -117,7 +117,6 @@ namespace DataAccessLayer.Repository
         // Update user
         public T UpdateUserGen<T>(T user) where T : UserModel
         {
-            //var existingUser1 = _context.Users.OfType<T>().FirstOrDefault(u => u.UserId == user.UserId);
             var existingUser = GetUserByIdGen<T>(user.UserId);
 
             if (existingUser == null)
@@ -167,7 +166,6 @@ namespace DataAccessLayer.Repository
 
                 if (appoint != null)
                 {
-                    // update pdf file on table appointment model PDFFile
                     var pdfFile = _context.Appointments.FirstOrDefault(x => x.AppointId == appoint);
                     pdfFile.PDFFile = imageUser.ImgId.ToString();
                     _context.Appointments.Update(pdfFile);

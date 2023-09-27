@@ -133,7 +133,7 @@
                 <form method="post" enctype="multipart/form-data" id="uploadForm" asp-controller="DashBoard" asp-action="AddFile">
                     <label class="form-label" for="customFile">Default file pdf * <span class="badge bg-danger">Just PDF</span></label>
                     <input type="file" class="form-control" id="file" name="file" />
-                    <input name="appoint" value="@Model.Appointments.AppointId" type="hidden" />
+                    <input name="appointId" value="@Model.Appointments.AppointId" type="hidden" />
                     <br />
                     <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Upload</button>
                     <a href="#" class="btn btn-danger"><i class="bi bi-download"></i> Download</a>

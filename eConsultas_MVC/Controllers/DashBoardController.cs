@@ -22,6 +22,7 @@ namespace eConsultas_MVC.Controllers
             _imgToDir = imgToDir;
         }
 
+        /* Login */
         public IActionResult Index()
         {
             string _token = HttpContext.Session.GetString("Token");
@@ -33,10 +34,12 @@ namespace eConsultas_MVC.Controllers
             return RedirectToAction("DashLand");
         }
 
+        /* Dashboard */
         public async Task<IActionResult> DashLand()
         {
             string userImg = null;
-            await Task.Delay(TimeSpan.FromSeconds(1)); // Atraso de 2 segundos
+            await Task.Delay(TimeSpan.FromSeconds(1)); // Atraso de 1 segundos
+
             string _token = HttpContext.Session.GetString("Token");
             if (string.IsNullOrEmpty(_token))
             {
@@ -45,11 +48,10 @@ namespace eConsultas_MVC.Controllers
             else
             {
                 var user = await GetUser(_token);
-                // save user in session
                 HttpContext.Session.SetString("User", JsonConvert.SerializeObject(user));
+
                 var getUser = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
                 var img = GetAllUserFiles("/img/").Result;
-
                 userImg = img.FirstOrDefault(x => x.UserId == getUser.UserId)?.ImageUrl;
                 if (!string.IsNullOrEmpty(userImg))
                 {
@@ -65,251 +67,15 @@ namespace eConsultas_MVC.Controllers
             }
         }
 
-
-        [HttpGet]
-        public async Task<IActionResult> CreateAppoint(string region, string city, string specialization)
-        {
-            string token = HttpContext.Session.GetString("Token");
-
-            // Call your API method to retrieve doctors with the query parameters
-            List<DoctorMV> doctors = await GetDoctorsBy(token, region, city, specialization);
-
-            return View(doctors);
-        }
-
-
-        public IActionResult CreatePatient()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult CreatePatient(CreatePatientMV createPatient)
-        {
-            string token = HttpContext.Session.GetString("Token");
-
-            var content = new StringContent(JsonConvert.SerializeObject(createPatient), Encoding.UTF8, "application/json");
-
-            HttpResponseMessage response = _httpClient.PostAsync("Users/Addpatient", content).Result;
-
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToAction("DashLand");
-            }
-            else
-            {
-                return RedirectToAction("Erro");
-            }
-        }
-
-        public IActionResult SendAppointment(int id)
-        {
-            //get doctor by id
-            string token = HttpContext.Session.GetString("Token");
-            var doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == id);
-
-            return View(doctor);
-        }
-
-        //Endpoin addApointment
-        [HttpPost]
-        public async Task<IActionResult> AddApointment(int doctorId, string patientMessage)
-        {
-            string token = HttpContext.Session.GetString("Token");
-            var user = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
-
-            // Build the query parameters as a dictionary
-            var queryParams = new Dictionary<string, string>
-            {
-                { "doctorId", doctorId.ToString() },
-                { "patientMessage", patientMessage }
-            };
-
-            // Create a query string from the dictionary
-            var queryString = new FormUrlEncodedContent(queryParams).ReadAsStringAsync().Result;
-
-            // Construct the full API URL with the query string
-            string apiUrl = $"Appointments/CreateAppointment?{queryString}";
-
-            try
-            {
-                // Configure the HTTP client headers with authorization
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                // Make the POST request with an empty content
-                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(""));
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction("DashLand");
-                }
-                else
-                {
-                    return RedirectToAction("Erro");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions as needed
-                return RedirectToAction("Erro");
-            }
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> Message(int id)
-        {
-            if (id != null)
-            {
-                // Get appointment by id
-                string token = HttpContext.Session.GetString("Token");
-                var appointment = GetAppointments(token).Result.FirstOrDefault(x => x.AppointId == id);
-
-                if (appointment == null)
-                {
-                    // Handle the case where the appointment with the given ID was not found
-                    return NotFound();
-                }
-
-                var messages = await GetMessages(token, id.ToString());
-                var viewMessageModel = new MessageListsMV
-                {
-                    Messages = messages,// You need to implement this method
-                    Appointments = appointment,
-                    FilesImg = GetAllUserFiles("/img/").Result,
-                    FilesPdf = GetAllUserFiles("/pdf/").Result
-                };
-
-                return View(viewMessageModel);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        //get messages by appointment id
-        public async Task<List<MessageMV>> GetMessages(string token, string appointmentId)
-        {
-            string apiUrl = $"Appointments/GetMessageByAppointId?appointmentId={appointmentId}";
-
-            try
-            {
-                // Configure the authorization header with the token
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                // Make the API call
-                HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    List<MessageMV> messages = JsonConvert.DeserializeObject<List<MessageMV>>(responseContent);
-                    return messages;
-                }
-                else
-                {
-                    // Handle the error as needed, e.g., return an empty list or throw an exception
-                    return new List<MessageMV>();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle the error as needed, e.g., return an empty list or throw an exception
-                return new List<MessageMV>();
-            }
-        }
-
-
-        //Endpoin addMessage
-        [HttpPost]
-        public async Task<IActionResult> AddMessage(string appointmentId, string message)
-        {
-            string token = HttpContext.Session.GetString("Token");
-            var user = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
-
-            // Build the query parameters as a dictionary
-            var queryParams = new Dictionary<string, string>
-            {
-                { "appointmentId", appointmentId },
-                { "message", message }
-            };
-
-            // Create a query string from the dictionary
-            var queryString = new FormUrlEncodedContent(queryParams).ReadAsStringAsync().Result;
-
-            // Construct the full API URL with the query string
-            string apiUrl = $"Appointments/AddMessage?{queryString}";
-
-            try
-            {
-                // Configure the HTTP client headers with authorization
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                // Make the POST request with an empty content
-                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(""));
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction("Message", "DashBoard", new { id = appointmentId });
-                }
-                else
-                {
-                    return RedirectToAction("Erro", "Home");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions as needed
-                return RedirectToAction("Erro");
-            }
-        }
-
-        public async Task<IActionResult> Login(LoginMV login)
-        {
-            if (!ModelState.IsValid) return View(login);
-
-            string apiUrl = "Login/Login";
-
-            var content = new StringContent(JsonConvert.SerializeObject(login), Encoding.UTF8, "application/json");
-
-            HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
-            HttpContext.Session.Clear();
-            //clear session Token
-            HttpContext.Session.Remove("Token");
-
-            if (response.IsSuccessStatusCode)
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                // Limpe a sessão
-                if (responseContent != null)
-                {
-                    HttpContext.Session.SetString("Token", responseContent);
-                    return RedirectToAction("DashLand");
-                }
-                else
-                {
-                    return RedirectToAction("Index");
-                }
-
-            }
-            else
-            {
-                return RedirectToAction("Index");
-            }
-        }
-
-        // get User logged passing token
+        /* Get user Logged Info */
         private async Task<UserMV> GetUser(string token)
         {
             string apiUrl = "Login/GetUserLogged";
 
             try
             {
-                // Configure o cabeçalho de autorização com o token
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                // Faça a chamada à API
                 HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, null);
 
                 if (response.IsSuccessStatusCode)
@@ -330,16 +96,73 @@ namespace eConsultas_MVC.Controllers
             }
         }
 
+        /* view create appointment*/
+        [HttpGet]
+        public async Task<IActionResult> CreateAppoint(string region, string city, string specialization)
+        {
+            string token = HttpContext.Session.GetString("Token");
+            List<DoctorMV> doctors = await GetDoctorsBy(token, region, city, specialization);
+
+            return View(doctors);
+        }
+
+        public IActionResult SendAppointment(int id)
+        {
+            //get doctor by id
+            string token = HttpContext.Session.GetString("Token");
+            var doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == id);
+
+            return View(doctor);
+        }
+
+        /* Create Appointment just Patient can create a new appointment by add doctor and message*/
+        [HttpPost]
+        public async Task<IActionResult> AddApointment(int doctorId, string patientMessage)
+        {
+            string token = HttpContext.Session.GetString("Token");
+            var user = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
+
+            // Build the query parameters as a dictionary
+            var queryParams = new Dictionary<string, string>
+            {
+                { "doctorId", doctorId.ToString() },
+                { "patientMessage", patientMessage }
+            };
+
+            var queryString = new FormUrlEncodedContent(queryParams).ReadAsStringAsync().Result;
+
+            string apiUrl = $"Appointments/CreateAppointment?{queryString}";
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(""));
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("DashLand");
+                }
+                else
+                {
+                    return RedirectToAction("Erro");
+                }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Erro");
+            }
+        }
+
+        /* Get all appointments by user id */
         private async Task<List<AppointmentMV>> GetAppointments(string token)
         {
             string apiUrl = "Appointments/GetAppointById";
 
             try
             {
-                // Configure o cabeçalho de autorização com o token
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                // Faça a chamada à API
                 HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, null);
 
                 if (response.IsSuccessStatusCode)
@@ -350,105 +173,12 @@ namespace eConsultas_MVC.Controllers
                 }
                 else
                 {
-                    // Trate o erro de acordo com suas necessidades
-                    // Pode ser lançada uma exceção ou retornada uma lista vazia, dependendo do caso.
-                    return new List<AppointmentMV>();
+                    return new List<AppointmentMV>(null);
                 }
             }
             catch (Exception ex)
             {
-                // Trate o erro de acordo com suas necessidades
-                // Pode ser lançada uma exceção ou retornada uma lista vazia, dependendo do caso.
-                return new List<AppointmentMV>();
-            }
-        }
-
-        //get all doctors
-        public async Task<List<DoctorMV>> GetDoctors(string token)
-        {
-            string apiUrl = "Users/GetAllDoctor";
-
-            try
-            {
-                // Configure o cabeçalho de autorização com o token
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                // Faça a chamada à API
-                HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    var genericModels = JsonConvert.DeserializeObject<List<DoctorMV>>(responseContent);
-                    return genericModels;
-                }
-                else
-                {
-                    // Trate o erro de acordo com suas necessidades
-                    // Pode ser lançada uma exceção ou retornada uma lista vazia, dependendo do caso.
-                    return new List<DoctorMV>();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Trate o erro de acordo com suas necessidades
-                // Pode ser lançada uma exceção ou retornada uma lista vazia, dependendo do caso.
-                return new List<DoctorMV>();
-            }
-        }
-
-        //get doctor by id
-        public async Task<List<DoctorMV>> GetDoctorsBy(string token, string? region = null, string? city = null, string? specialization = null)
-        {
-            try
-            {
-                string apiUrl = "http://localhost:5242/Users/DoctorBy";
-
-                // Create a query string with the optional parameters
-                var queryParameters = new List<string>();
-                if (!string.IsNullOrEmpty(region))
-                {
-                    queryParameters.Add($"region={region}");
-                }
-                if (!string.IsNullOrEmpty(city))
-                {
-                    queryParameters.Add($"city={city}");
-                }
-                if (!string.IsNullOrEmpty(specialization))
-                {
-                    queryParameters.Add($"specialization={specialization}");
-                }
-
-                if (queryParameters.Count > 0)
-                {
-                    apiUrl += "?" + string.Join("&", queryParameters);
-                }
-
-                // Configure the HttpClient with the token
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                    // Make the GET request
-                    HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        List<DoctorMV> doctors = JsonConvert.DeserializeObject<List<DoctorMV>>(responseContent);
-                        return doctors;
-                    }
-                    else
-                    {
-                        // Handle the error as needed (e.g., return an empty list or throw an exception)
-                        return new List<DoctorMV>();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle the exception as needed (e.g., log the error or return an empty list)
-                return new List<DoctorMV>();
+                return new List<AppointmentMV>(null);
             }
         }
 
@@ -494,8 +224,243 @@ namespace eConsultas_MVC.Controllers
         }
 
 
-        /* updates users info*/
+        /* view Patient */
+        public IActionResult CreatePatient()
+        {
+            return View();
+        }
 
+        /* Create Patient */
+        [HttpPost]
+        public IActionResult CreatePatient(CreatePatientMV createPatient)
+        {
+            string token = HttpContext.Session.GetString("Token");
+
+            var content = new StringContent(JsonConvert.SerializeObject(createPatient), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _httpClient.PostAsync("Users/Addpatient", content).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("DashLand");
+            }
+            else
+            {
+                return RedirectToAction("Erro");
+            }
+        }
+
+        
+        /* view Chat */
+        [HttpGet]
+        public async Task<IActionResult> Message(int id)
+        {
+            if (id != null)
+            {
+                string token = HttpContext.Session.GetString("Token");
+                var appointment = GetAppointments(token).Result.FirstOrDefault(x => x.AppointId == id);
+
+                if (appointment == null)
+                {
+                    return NotFound(null);
+                }
+
+                var messages = await GetMessages(token, id.ToString());
+                var viewMessageModel = new MessageListsMV
+                {
+                    Messages = messages,
+                    Appointments = appointment,
+                    FilesImg = GetAllUserFiles("/img/").Result,
+                    FilesPdf = GetAllUserFiles("/pdf/").Result
+                };
+
+                return View(viewMessageModel);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /*Get all message by appointment Id*/
+        public async Task<List<MessageMV>> GetMessages(string token, string appointmentId)
+        {
+            string apiUrl = $"Appointments/GetMessageByAppointId?appointmentId={appointmentId}";
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    List<MessageMV> messages = JsonConvert.DeserializeObject<List<MessageMV>>(responseContent);
+                    return messages;
+                }
+                else
+                {
+                    return new List<MessageMV>(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new List<MessageMV>(null);
+            }
+        }
+
+
+        /* Add message to appointment */
+        [HttpPost]
+        public async Task<IActionResult> AddMessage(string appointmentId, string message)
+        {
+            string token = HttpContext.Session.GetString("Token");
+            var user = JsonConvert.DeserializeObject<UserMV>(HttpContext.Session.GetString("User"));
+
+            var queryParams = new Dictionary<string, string>
+            {
+                { "appointmentId", appointmentId },
+                { "message", message }
+            };
+
+            var queryString = new FormUrlEncodedContent(queryParams).ReadAsStringAsync().Result;
+
+            string apiUrl = $"Appointments/AddMessage?{queryString}";
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, new StringContent(""));
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Message", "DashBoard", new { id = appointmentId });
+                }
+                else
+                {
+                    return RedirectToAction("Erro");
+                }
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Erro");
+            }
+        }
+
+        /* Login */
+        public async Task<IActionResult> Login(LoginMV login)
+        {
+            if (!ModelState.IsValid) return View(login);
+
+            string apiUrl = "Login/Login";
+
+            var content = new StringContent(JsonConvert.SerializeObject(login), Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+
+            HttpContext.Session.Clear();
+            HttpContext.Session.Remove("Token");
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent != null)
+                {
+                    HttpContext.Session.SetString("Token", responseContent);
+                    return RedirectToAction("DashLand");
+                }
+                else
+                {
+                    return RedirectToAction("Index");
+                }
+
+            }
+            else
+            {
+                return RedirectToAction("Erro");
+            }
+        }
+
+        //get all doctors
+        public async Task<List<DoctorMV>> GetDoctors(string token)
+        {
+            string apiUrl = "Users/GetAllDoctor";
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    var genericModels = JsonConvert.DeserializeObject<List<DoctorMV>>(responseContent);
+                    return genericModels;
+                }
+                else
+                {
+                    return new List<DoctorMV>(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new List<DoctorMV>(null);
+            }
+        }
+
+        //get doctor by 
+        public async Task<List<DoctorMV>> GetDoctorsBy(string token, string? region = null, string? city = null, string? specialization = null)
+        {
+            try
+            {
+                string apiUrl = "http://localhost:5242/Users/DoctorBy";
+
+                // Create a query string with the optional parameters
+                var queryParameters = new List<string>();
+                if (!string.IsNullOrEmpty(region))
+                {
+                    queryParameters.Add($"region={region}");
+                }
+                if (!string.IsNullOrEmpty(city))
+                {
+                    queryParameters.Add($"city={city}");
+                }
+                if (!string.IsNullOrEmpty(specialization))
+                {
+                    queryParameters.Add($"specialization={specialization}");
+                }
+
+                if (queryParameters.Count > 0)
+                {
+                    apiUrl += "?" + string.Join("&", queryParameters);
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    List<DoctorMV> doctors = JsonConvert.DeserializeObject<List<DoctorMV>>(responseContent);
+                    return doctors;
+                }
+                else
+                {
+                    return new List<DoctorMV>(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new List<DoctorMV>();
+            }
+        }
+
+
+        /* view updates users info*/
         public IActionResult UpdateUser()
         {
             string token = HttpContext.Session.GetString("Token");
@@ -512,8 +477,7 @@ namespace eConsultas_MVC.Controllers
                     var viewModel = new UsersInfo
                     {
                         User = user,
-                        Doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == user.UserId),
-                        //Files = GetAllUserFiles("/img/").Result
+                        Doctor = GetDoctors(token).Result.FirstOrDefault(x => x.UserId == user.UserId)
 
                     };
                     return View(viewModel);
@@ -531,13 +495,12 @@ namespace eConsultas_MVC.Controllers
             return RedirectToAction("Index");
         }
 
-        //update user specializations
+        //update user Info
         [HttpPost]
         public IActionResult UpdateUser(DoctorMV doctor)
         {
 
             string token = HttpContext.Session.GetString("Token");
-            // Configure o cabeçalho de autorização com o token
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var content = new StringContent(JsonConvert.SerializeObject(doctor), Encoding.UTF8, "application/json");
@@ -559,7 +522,7 @@ namespace eConsultas_MVC.Controllers
         public IActionResult ChangePassword(ChangePasswordMV changePassword)
         {
             string token = HttpContext.Session.GetString("Token");
-            // Configure o cabeçalho de autorização com o token
+
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var content = new StringContent(JsonConvert.SerializeObject(changePassword), Encoding.UTF8, "application/json");
@@ -576,9 +539,9 @@ namespace eConsultas_MVC.Controllers
             }
         }
 
-        // add user image to endpoint Users/addImage sendinding IFormFile
+        // save user image/pdf 
         [HttpPost]
-        public async Task<IActionResult> AddFile(IFormFile file)
+        public async Task<IActionResult> AddFile(IFormFile file, int? appointId = null)
         {
             if (file == null)
             {
@@ -627,10 +590,18 @@ namespace eConsultas_MVC.Controllers
                 }
 
                 var content = new StringContent($"fileUrl={fileUrl}", Encoding.UTF8, "application/x-www-form-urlencoded");
-
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
-                HttpResponseMessage response = await _httpClient.PostAsync($"Users/addFile?fileUrl={fileUrl}", content);
+                HttpResponseMessage response;
+
+                if (appointId == null)
+                {
+                    response = await _httpClient.PostAsync($"Users/addFile?fileUrl={fileUrl}", content);
+                }
+                else
+                {
+                    response = await _httpClient.PostAsync($"Users/addFile?fileUrl={fileUrl}&appointId={appointId}", content);
+                }
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -640,6 +611,7 @@ namespace eConsultas_MVC.Controllers
                 {
                     return RedirectToAction("Erro");
                 }
+
             }
             catch (Exception ex)
             {
@@ -649,7 +621,7 @@ namespace eConsultas_MVC.Controllers
 
 
 
-        //get user logged image
+        //get user logged image/pdf
         public async Task<List<FileMV>> GetAllUserFiles(string directory)
         {
             string token = HttpContext.Session.GetString("Token");
@@ -664,11 +636,20 @@ namespace eConsultas_MVC.Controllers
                 {
                     string responseContent = await response.Content.ReadAsStringAsync();
                     List<FileMV> files = JsonConvert.DeserializeObject<List<FileMV>>(responseContent);
+                    List<FileMV> returnFiles = new List<FileMV>();
+                    files.ForEach(x => {
+                        
+                        if (x.ImageUrl.Contains("img"))
+                        {
+                            x.ImageUrl = x.ImageUrl.Replace("wwwroot\\", "~/");
+                            x.ImageUrl = x.ImageUrl.Replace("\\", "/");
 
-                    files.ForEach(x => x.ImageUrl = x.ImageUrl.Replace("wwwroot\\", "~/"));
-                    files.ForEach(x => x.ImageUrl = x.ImageUrl.Replace("\\", "/"));
+                            returnFiles.Add(x);
+                        }
+                    });
 
-                    return files;
+
+                    return returnFiles;
                 }
                 else
                 {
@@ -681,7 +662,10 @@ namespace eConsultas_MVC.Controllers
             }
         }
 
-
+        public IActionResult Erro()
+        {
+            return View();
+        }
 
         //logout clear session
         public IActionResult Logout()

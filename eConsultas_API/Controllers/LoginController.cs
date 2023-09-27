@@ -79,8 +79,6 @@ namespace eConsultas_API.Controllers
         [HttpPost]
         public IActionResult ChangePwd([FromBody] ChangePwdModel changePwd, [FromHeader(Name = "Authorization")] string authorizationHeader)
         {
-
-
             string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
             if (string.IsNullOrEmpty(token)) return BadRequest("Invalid token");
@@ -113,9 +111,7 @@ namespace eConsultas_API.Controllers
             return Ok(await _loginRepository.ForgotPwd<UserModel>(forgotPwd));
         }
 
-
-        ///*testar metodo logger*/
-        /*testar metodo logger*/
+        /*logger*/
         private bool loggers(string msg, string authorizationHeader)
         {
             if (!string.IsNullOrEmpty(authorizationHeader))

@@ -31,8 +31,7 @@ namespace eConsultas_API.Controllers
             _decToken = decToken;
         }
 
-        /* Admin Section */
-
+        /* Doctor Sections */
         [HttpGet]
         [PrivilegeUser("Admin")]
         public IActionResult GetDoctorById(int doctorId, [FromHeader(Name = "Authorization")] string authorizationHeader)
@@ -44,6 +43,13 @@ namespace eConsultas_API.Controllers
         public IActionResult DoctorBy(string? region = null, string? city = null, string? Specialization = null)
         {
             return Ok(_userRepository.GetDoctorBy(region, city, Specialization));
+        }
+
+        [HttpGet]
+        [UserAcess]
+        public IActionResult GetAllDoctor([FromHeader(Name = "Authorization")] string authorizationHeader)
+        {
+            return Ok(_userRepository.GetAllUsersGen<DoctorModel>());
         }
 
         [HttpPost]
@@ -85,7 +91,6 @@ namespace eConsultas_API.Controllers
             return Ok(_userRepository.DeleteUserGen<DoctorModel>(user.UserId));
         }
 
-
         [HttpGet]
         [PrivilegeUser("Admin")]
         public IActionResult GetDoctorByEmail(string email)
@@ -93,7 +98,7 @@ namespace eConsultas_API.Controllers
             return Ok(_userRepository.GetUserByEmailGen<DoctorModel>(email));
         }
 
-        /* Doctor Section */
+
         [HttpPost]
         [PrivilegeUser("Doctor")]
         public IActionResult UpdateDoctor([FromHeader(Name = "Authorization")] string authorizationHeader, [FromBody] DoctorUpdateInfo doctor)
@@ -221,13 +226,6 @@ namespace eConsultas_API.Controllers
             }
         }
 
-        [HttpGet]
-        [UserAcess]
-        public IActionResult GetAllDoctor([FromHeader(Name = "Authorization")] string authorizationHeader)
-        {
-            return Ok(_userRepository.GetAllUsersGen<DoctorModel>());
-        }
-
         /* metodos aberto sem restrinção*/
         [HttpPost]
         public IActionResult AddPatient(PatientModel patient)
@@ -248,9 +246,10 @@ namespace eConsultas_API.Controllers
             }
         }
 
+
         [HttpPost]
         [UserAcess]
-        public IActionResult addFile(string fileUrl, [FromHeader(Name = "Authorization")] string authorizationHeader)
+        public IActionResult addFile(string fileUrl, [FromHeader(Name = "Authorization")] string authorizationHeader, int? appointId = null)
         {
             string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
@@ -274,19 +273,35 @@ namespace eConsultas_API.Controllers
             FileUser image = new FileUser();
             image.ImageUrl = fileUrl;
             image.UserId = userId;
-            bool isSend = _userRepository.IsFileCopy(image, userId);
-            if (isSend)
+
+            if (appointId != null)
             {
-                return Ok("Image send successfully");
+                bool isSend = _userRepository.IsFileCopy(image, userId, appointId);
+                if (isSend)
+                {
+                    return Ok("PDF send successfully");
+                }
+                else
+                {
+                    return BadRequest("Error sending image");
+                }
             }
             else
             {
-                return BadRequest("Error sending image");
+                bool isSend = _userRepository.IsFileCopy(image, userId);
+                if (isSend)
+                {
+                    return Ok("Image send successfully");
+                }
+                else
+                {
+                    return BadRequest("Error sending image");
+                }
             }
-           
+
         }
 
-        //receid token get user logged and return image url
+        //receive token get user logged and return image url
         [HttpGet]
         [UserAcess]
         public IActionResult GetImage([FromHeader(Name = "Authorization")] string authorizationHeader)
@@ -317,9 +332,7 @@ namespace eConsultas_API.Controllers
             }
         }
 
-
-
-        /*testar metodo logger*/
+        /*logger*/
         private bool loggers(string msg, string authorizationHeader)
         {
             if (!string.IsNullOrEmpty(authorizationHeader))
