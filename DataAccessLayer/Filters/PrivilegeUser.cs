@@ -25,6 +25,7 @@ namespace DataAccessLayer.Filters
             _userType = userType;
         }
 
+        /* execute before the action executes */
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             var secretKey = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>()["Jwt:Key"];
@@ -33,11 +34,10 @@ namespace DataAccessLayer.Filters
             _secretKey = secretKey;
             _validIssuer = validIssuer;
             _validAudience = validAudience;
-            // Verifique se o cabeçalho de autorização não está vazio e começa com "Bearer "
+
             string authorizationHeader = context.HttpContext.Request.Headers["Authorization"];
             if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
             {
-                // Extrai o token do cabeçalho
                 string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
                 if (ValidateToken(token, _userType))
@@ -46,20 +46,18 @@ namespace DataAccessLayer.Filters
                 }
                 else
                 {
-                    // Token inválido, retorne uma resposta não autorizada
                     context.Result = new UnauthorizedResult();
                 }
             }
             else
             {
-                // Cabeçalho de autorização inválido, retorne não autorizada
                 context.Result = new UnauthorizedResult();
             }
 
             base.OnActionExecuting(context);
         }
 
-        /* validar token OBS - pensar numa forma de não repetir o código de validação!!!!*/
+        // validate token from the request
         public bool ValidateToken(string token, string userType)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -70,7 +68,6 @@ namespace DataAccessLayer.Filters
                 SecurityToken validatedToken;
                 var claimsPrincipal = tokenHandler.ValidateToken(token, validationParameters, out validatedToken);
 
-                // Verifique o tipo de usuário no token
                 var userTypeClaim = ((JwtSecurityToken)validatedToken).Claims.FirstOrDefault(claim => claim.Type == "UserType");
                 if (userTypeClaim != null && userTypeClaim.Value == userType)
                 {
@@ -85,6 +82,7 @@ namespace DataAccessLayer.Filters
             return false;
         }
 
+        // get validation parameters
         private TokenValidationParameters GetValidationParameters(string secretKey)
         {
             return new TokenValidationParameters

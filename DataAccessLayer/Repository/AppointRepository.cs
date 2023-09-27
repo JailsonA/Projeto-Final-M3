@@ -18,7 +18,6 @@ namespace DataAccessLayer.Repository
     public class AppointRepository : IAppointInterface
     {
         private readonly ClinicaDbContext _context;
-
         private readonly ILogger<AppointRepository> _logger;
         private readonly IUserInterface _userRepository;
         private readonly IDecToken _decToken;
@@ -31,8 +30,7 @@ namespace DataAccessLayer.Repository
             _context = context;
         }
 
-        /* Appointment Section */
-
+        /* Create appointment */
         public AppointmentModel CreateAppointment(int doctorId, int patientId, string? patientMessage = null)
         {
             //transaction
@@ -87,6 +85,7 @@ namespace DataAccessLayer.Repository
 
         }
 
+        /* Get appointment by userId or/and apointmentId */
         public List<AppointmentModel> GetAppointmentId(int userId, int? appointmentId = null)
         {
             var query = _context.Appointments
@@ -102,6 +101,7 @@ namespace DataAccessLayer.Repository
             return query.ToList();
         }
 
+        /* Get message by userId and apointmentId */
         public List<MessageModel> GetMessageByAppointId(int appointmentId, int userId)
         {
             var _user = _context.Users.Find(userId);
@@ -124,7 +124,7 @@ namespace DataAccessLayer.Repository
             return query.ToList();
         }
 
-        /* Message Section */
+        /* Add message by userId and appointment */
         public object AddMessage(int userId, int appointmentId, string message)
         {
             var transaction = _context.Database.BeginTransaction();
@@ -145,7 +145,6 @@ namespace DataAccessLayer.Repository
 
                 if (appointment.IsCompleted == true)
                 {
-                    // Retorna todas as mensagens da consulta como uma lista
                     var messages = _context.Message
                         .Where(x => x.AppointId == appointmentId).ToList();
 
@@ -185,7 +184,7 @@ namespace DataAccessLayer.Repository
             }
         }
 
-        //finishe appointment
+        /* Finish appointment by userId Doctor*/
         public object FinishAppointment(int userId, int appointmentId)
         {
             var transaction = _context.Database.BeginTransaction();
@@ -218,17 +217,7 @@ namespace DataAccessLayer.Repository
             }
         }
 
-        //public bool IsFileCopy(FileUser pdfFile, int userId)
-        //{
-        //    List<string> permExtensions = new List<string> { ".pdf", ".PDF" };
-        //    string uploadDirectory = "pdf/Upload";
-        //    ImgToDir imgToDir = new ImgToDir();
-        //    string isUpload = imgToDir.CopyFile(pdfFile.imageFile, permExtensions, uploadDirectory, _context, userId);
-        //    if (string.IsNullOrEmpty(isUpload)) return false;
-        //    else return true;
-        //}
-
-        //download pdf file
+        //download pdf file testar
         public string GetPdfFilePath(int appointId)
         {
             var appoint = _context.Appointments.Find(appointId);

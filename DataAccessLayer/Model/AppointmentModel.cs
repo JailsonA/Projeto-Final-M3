@@ -16,14 +16,14 @@ namespace DataAccessLayer.Model
         public int AppointId { get; set; }
         public DoctorModel Doctor { get; set; }
         public PatientModel Patient { get; set; }
-        public string? PDFFile { get; set; } // Nome do paciente
-        public string PatientMsg { get; set; } // Mensagem do paciente
-        public string? DoctorMsg { get; set; } // Mensagem do médico
-        public float? Price { get; set; } // Preço da consulta
-        public DateTime UpdateTime { get; set; } // Data e hora da consulta
+        public string? PDFFile { get; set; }
+        public string PatientMsg { get; set; }
+        public string? DoctorMsg { get; set; }
+        public float? Price { get; set; }
+        public DateTime UpdateTime { get; set; }
         public DateTime AppointmentDate { get; set; }
         public string? info { get; set; }
-        public bool IsCompleted { get; set; } // Indica se a consulta foi concluída
+        public bool IsCompleted { get; set; }
 
     }
 }

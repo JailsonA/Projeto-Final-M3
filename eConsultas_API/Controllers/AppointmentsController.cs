@@ -93,8 +93,6 @@ namespace eConsultas_API.Controllers
 
                 if (string.IsNullOrEmpty(token)) return BadRequest("Invalid token");
 
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-
                 var loggedUser = _decToken.GetLoggedUser(token);
 
                 if (loggedUser == null) return NotFound("Invalid user or password");

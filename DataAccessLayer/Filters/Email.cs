@@ -47,8 +47,6 @@ namespace DataAccessLayer.Filters
             }
             catch (System.Exception ex)
             {
-                // Gravar log de erro ao enviar e-mail
-                Console.WriteLine("email not send" + ex.Message);
                 return false;
             }
         }

@@ -61,7 +61,7 @@ namespace DataAccessLayer.Filters
             };
         }
 
-
+        /*Get User by token*/
         public LoggedModel GetLoggedUser(string token)
         {
             try

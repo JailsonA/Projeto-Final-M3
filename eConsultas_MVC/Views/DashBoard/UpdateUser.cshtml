@@ -7,7 +7,6 @@
     string userJson = HttpContextAccessor.HttpContext.Session.GetString("User");
     var user = JsonConvert.DeserializeObject<UserMV>(userJson);
     string imgUrl = HttpContextAccessor.HttpContext.Session.GetString("UserImg");
-
 }
 
 <div class="pagetitle">
@@ -31,8 +30,6 @@
                     @if (!string.IsNullOrEmpty(imgUrl))
                     {
                         <img src="@Url.Content(imgUrl)" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60" />
-
-
                     }
                     else
                     {
@@ -78,12 +75,10 @@
                             <li class="nav-item">
                                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-fees">Fees</button>
                             </li>
-
                         }
                         <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
                         </li>
-
                     </ul>
                     <div class="tab-content pt-2">
 

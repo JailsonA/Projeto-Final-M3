@@ -59,32 +59,7 @@ namespace DataAccessLayer.Repository
             return doctors;
         }
 
-        public bool IsFileCopy(FileUser image, int userId, int? appoint = null)
-        {
-            if (image != null)
-            {
-                var imageUser = new FileUser
-                {
-                    ImageUrl = image.ImageUrl,
-                    UserId = userId
-                };
-                _context.ImgUser.Add(imageUser);
-                _context.SaveChanges();
-
-                if (appoint != null)
-                {
-                    // update pdf file on table appointment model PDFFile
-                    var pdfFile = _context.Appointments.FirstOrDefault(x => x.AppointId == appoint);
-                    pdfFile.PDFFile = imageUser.ImgId.ToString();
-                    _context.Appointments.Update(pdfFile);
-                    _context.SaveChanges();
-                }
-
-                return true;
-            }
-
-            return false;
-        }
+        
 
         /*Metodos Genericos Users*/
         // add user
@@ -170,13 +145,40 @@ namespace DataAccessLayer.Repository
             return existingUser;
         }
 
-        //GetImage by userId and return image path
+        //Get all Image url by userId and return image path
         public List<FileUser> GetImage()
         {
             var userImg = _context.ImgUser.ToList();
             return userImg;
         }
 
+        /* Save url File to Data base */
+        public bool IsFileCopy(FileUser image, int userId, int? appoint = null)
+        {
+            if (image != null)
+            {
+                var imageUser = new FileUser
+                {
+                    ImageUrl = image.ImageUrl,
+                    UserId = userId
+                };
+                _context.ImgUser.Add(imageUser);
+                _context.SaveChanges();
+
+                if (appoint != null)
+                {
+                    // update pdf file on table appointment model PDFFile
+                    var pdfFile = _context.Appointments.FirstOrDefault(x => x.AppointId == appoint);
+                    pdfFile.PDFFile = imageUser.ImgId.ToString();
+                    _context.Appointments.Update(pdfFile);
+                    _context.SaveChanges();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
 
     }
 }

@@ -12,17 +12,19 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 
 namespace DataAccessLayer.Filters
 {
+    /*Interface*/
     public interface IGenTokenFilter
     {
         string GenerateRandomSecretKey(int length);
         string GenerateToken(UserModel user);
     }
+
+    /* implementation  */
     public class GenTokenFilter : IGenTokenFilter
     {
         private IConfiguration _configuration;
@@ -31,7 +33,8 @@ namespace DataAccessLayer.Filters
         {
             _configuration = configuration;
         }
-        
+
+        /*Generate Secret key*/
         public string GenerateRandomSecretKey(int length)
         {
             const string validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -46,6 +49,7 @@ namespace DataAccessLayer.Filters
             return sb.ToString();
         }
 
+        /*Generate Token*/
         public string GenerateToken(UserModel user)
         {
             if (user != null)
@@ -84,7 +88,7 @@ namespace DataAccessLayer.Filters
             }
         }
 
-
+        /* Update secret key on appseting */
         public bool UpdateJwtKey(string appSettingsPath, string newKey)
         {
             try

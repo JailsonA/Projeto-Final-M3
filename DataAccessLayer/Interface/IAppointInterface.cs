@@ -10,7 +10,6 @@ namespace DataAccessLayer.Repository
 {
     public interface IAppointInterface
     {
-        //bool IsFileCopy(FileUser pdfFile, int userId);
         object FinishAppointment(int userId, int appointmentId);
         List<MessageModel> GetMessageByAppointId(int appointmentId, int userId);
         object AddMessage(int userId, int appointmentId, string message);
